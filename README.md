@@ -1,4 +1,4 @@
-# ⚰Tomb - Password Manager powered by AES-256-CBC encryption.
+# ⚰Tomb - Password Manager powered by Rust and AES-256-CBC encryption.
 
 [![CI](https://github.com/gabrielfalcao/tomb/actions/workflows/rust.yml/badge.svg)](https://github.com/gabrielfalcao/tomb/actions/workflows/rust.yml)
 
