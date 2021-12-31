@@ -1,6 +1,6 @@
-pub mod app;
 pub mod logging;
 use crate::aes256cbc::{Config as AesConfig, Digest, Key};
+
 use crate::core::version;
 use crate::{
     config::{YamlFile, YamlFileError},

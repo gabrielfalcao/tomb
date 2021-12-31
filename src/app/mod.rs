@@ -9,8 +9,8 @@ pub use components::{menu::Menu, modal::Modal, searchbox::SearchBox};
 
 pub use {application::*, geometry::*, logging::*, routes::*, state::*};
 
-use super::{AES256Secret, AES256Tomb};
 use crate::aes256cbc::{Config as AesConfig, Key};
+use crate::tomb::{AES256Secret, AES256Tomb};
 
 use std::{cell::RefCell, rc::Rc};
 

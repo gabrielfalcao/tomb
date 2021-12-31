@@ -1,4 +1,5 @@
 pub mod aes256cbc;
+pub mod app;
 pub mod colors;
 pub mod config;
 pub mod core;

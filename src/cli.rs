@@ -9,10 +9,10 @@ use std::path::Path;
 use std::panic;
 use tomb::{
     aes256cbc::{Config as AesConfig, Key, DEFAULT_KEY_PATH},
-    //    colors,
+    app,
     config::YamlFile,
     logger,
-    tomb::{app, AES256Tomb},
+    tomb::AES256Tomb,
 };
 
 pub const DEFAULT_TOMB_FILE: &'static str = "~/.tomb.yaml";

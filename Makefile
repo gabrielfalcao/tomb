@@ -75,7 +75,7 @@ tomb-list: build cls
 	$(TOMB_BIN) list -k $(TOMB_KEY) -t $(TOMB_FILE)
 
 tomb-get: build cls
-	$(TOMB_BIN) get -k $(TOMB_KEY) -t $(TOMB_FILE) /github/my-username
+	$(TOMB_BIN) get -k $(TOMB_KEY) -t $(TOMB_FILE) /github
 
 tomb-copy: build cls
 	$(TOMB_BIN) copy -k $(TOMB_KEY) -t $(TOMB_FILE) /spotify
