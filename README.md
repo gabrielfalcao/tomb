@@ -1,4 +1,11 @@
-# ⚰Tomb - Password Manager powered by Rust and AES-256-CBC encryption.
+# ⚰Tomb - CLI Password Manager
+
+Tomb is a command-line password manager built with Rust and TUI, it
+stores encrypted secrets in a single yaml file, dubbed _Tomb File_.
+
+The encryption is powered by AES-256-CBC and private key generation
+by PBKDF2 derivation of user-input passwords.
+
 
 [![CI](https://github.com/gabrielfalcao/tomb/actions/workflows/rust.yml/badge.svg)](https://github.com/gabrielfalcao/tomb/actions/workflows/rust.yml)
 
