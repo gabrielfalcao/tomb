@@ -59,29 +59,26 @@ coverage: cls
 tomb: tomb-init tomb-save tomb-list tomb-get tomb-copy
 
 tomb-init: build cls
-	$(TOMB_BIN) genkey -K 1111 -S 2222 -I 3333 -k $(TOMB_KEY) --password $(PASSWORD)
-	$(TOMB_BIN) init -k $(TOMB_KEY) -t $(TOMB_FILE)
+	$(TOMB_BIN) init -K 1111 -S 2222 -I 3333 -k $(TOMB_KEY) -t $(TOMB_FILE) --password $(PASSWORD)
 
 tomb-save: build cls
-	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) first-secret "first value"
-	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) foo bar
-	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) another-secret "another value"
-	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) last-secret "last value"
-	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) "passwords/work/gmail" "Sup@DupAs3cr3T"
-	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) "passwords/work/vpn" "Sup@1wadsaa"
-	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) "passwords/work/employee_id" "42069"
-	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) "passwords/personal/gmail" "s(22;@dup3cr3t"
-	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) "passwords/personal/spotify" "COCCOp@d99"
-	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) "passwords/personal/employee_id" "42069"
+	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) 'work/gmail' 'Sup@DupAs3cr3T'
+	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) 'work/vpn' 'Sup@1wadsaa'
+	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) 'work/employee_id' '42069'
+	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) '/gmail/my@gmail.com' 's(22;@dup3cr3t'
+	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) '/spotify' 'COCCOp@d99'
+	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) '/netflix' '42069'
+	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) '/github' 'f$$bd^*G0912'
+	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) '/twitter' '**7w337%@$$'
 
 tomb-list: build cls
 	$(TOMB_BIN) list -k $(TOMB_KEY) -t $(TOMB_FILE)
 
 tomb-get: build cls
-	$(TOMB_BIN) get -k $(TOMB_KEY) -t $(TOMB_FILE) another-secret
+	$(TOMB_BIN) get -k $(TOMB_KEY) -t $(TOMB_FILE) /github/my-username
 
 tomb-copy: build cls
-	$(TOMB_BIN) copy -k $(TOMB_KEY) -t $(TOMB_FILE) last-secret
+	$(TOMB_BIN) copy -k $(TOMB_KEY) -t $(TOMB_FILE) /spotify
 
 tomb-delete: build cls
 	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) temporary-secret "some value"

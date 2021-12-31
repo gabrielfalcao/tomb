@@ -4,6 +4,7 @@ use clipboard::ClipboardContext;
 use clipboard::ClipboardProvider;
 use console::style;
 use mac_notification_sys::*;
+use std::path::Path;
 //use console::style;
 use std::panic;
 use tomb::{
@@ -34,7 +35,10 @@ fn get_password_from_matches(matches: &ArgMatches) -> String {
     let ask_password = matches.is_present("ask_password");
     let password = if ask_password {
         match confirm_password() {
-            Some(password) => password,
+            Some(password) => {
+                logger::out::ok(format!("confirmed password: {}", password));
+                password
+            }
             None => String::from(matches.value_of("password").unwrap_or("")),
         }
     } else {
@@ -77,27 +81,6 @@ fn load_tomb(matches: &ArgMatches) -> AES256Tomb {
 }
 
 fn init_command(matches: &ArgMatches) {
-    let tomb_filepath = matches.value_of("tomb_filename").unwrap();
-
-    let key = load_key(matches);
-    let config = AesConfig::default().unwrap();
-
-    if AES256Tomb::import(tomb_filepath).is_ok() {
-        logger::err::warning(format!("file already exists: {}", tomb_filepath));
-        std::process::exit(0);
-    }
-    let mut tomb = AES256Tomb::new(tomb_filepath, key.clone(), config.clone());
-    match tomb.save() {
-        Ok(target) => {
-            logger::out::ok(format!("initialized tomb file: {}", target));
-        }
-        Err(err) => {
-            logger::err::error(format!("failed to save tomb file - {}", err));
-            std::process::exit(1);
-        }
-    };
-}
-fn genkey_command(matches: &ArgMatches) {
     let ask_password = matches.is_present("ask_password");
     let key_cycles = matches
         .value_of("key_cycles")
@@ -115,28 +98,52 @@ fn genkey_command(matches: &ArgMatches) {
         .parse::<u32>()
         .unwrap_or(1000);
 
-    let vec: [u32; 3] = [key_cycles, salt_cycles, iv_cycles];
-    let custom_config = AesConfig::from_vec(&vec);
-    let password = if ask_password {
-        match confirm_password() {
-            Some(password) => password,
-            None => String::from(matches.value_of("password").unwrap_or("")),
-        }
-    } else {
-        String::from(matches.value_of("password").unwrap_or(""))
-    };
-    let key = Key::from_password(&password.as_bytes(), &custom_config);
+    let tomb_filepath = matches.value_of("tomb_filename").unwrap();
+    let key_filename = matches.value_of("key_filename").unwrap();
 
-    let filename = matches.value_of("key_filename").unwrap();
-    //let key_yaml = key.to_yaml();
-    let key_path = match key.export(filename) {
-        Ok(path) => path,
-        Err(error) => {
-            eprintln!("{}", error);
+    let key = if !Path::new(key_filename).exists() {
+        let vec: [u32; 3] = [key_cycles, salt_cycles, iv_cycles];
+        let custom_config = AesConfig::from_vec(&vec);
+        let password = if ask_password {
+            match confirm_password() {
+                Some(password) => password,
+                None => String::from(matches.value_of("password").unwrap_or("")),
+            }
+        } else {
+            String::from(matches.value_of("password").unwrap_or(""))
+        };
+        logger::err::info(format!("deriving key from password, please be patient..."));
+        let key = Key::from_password(&password.as_bytes(), &custom_config);
+
+        let key_path = match key.export(key_filename) {
+            Ok(path) => path,
+            Err(error) => {
+                eprintln!("{}", error);
+                std::process::exit(1);
+            }
+        };
+        logger::err::ok(format!("generated key: {}", style(key_path).color256(214)));
+        key
+    } else {
+        Key::import(key_filename).unwrap()
+    };
+
+    let config = AesConfig::default().unwrap();
+
+    if AES256Tomb::import(tomb_filepath).is_ok() {
+        logger::err::warning(format!("file already exists: {}", tomb_filepath));
+        std::process::exit(0);
+    }
+    let mut tomb = AES256Tomb::new(tomb_filepath, key.clone(), config.clone());
+    match tomb.save() {
+        Ok(target) => {
+            logger::out::ok(format!("initialized tomb file: {}", target));
+        }
+        Err(err) => {
+            logger::err::error(format!("failed to save tomb file - {}", err));
             std::process::exit(1);
         }
     };
-    logger::err::ok(format!("generated key: {}", style(key_path).color256(214)));
 }
 
 fn save_command(matches: &ArgMatches) {
@@ -317,8 +324,8 @@ fn main() {
                 ),
         )
         .subcommand(
-            SubCommand::with_name("genkey")
-                .about("generates a tomb private key based on password")
+            SubCommand::with_name("init")
+                .about("initializes a tomb file and generates a key")
                 .arg(
                     Arg::with_name("key_filename")
                         .long("key-filename")
@@ -360,19 +367,6 @@ fn main() {
                         .default_value("16000")
                         .long("iv")
                         .short("I")
-                        .takes_value(true),
-                ),
-        )
-        .subcommand(
-            SubCommand::with_name("init")
-                .about("initializes a tomb file.")
-                .arg(
-                    Arg::with_name("key_filename")
-                        .long("key-filename")
-                        .help("the path to the aes256cbc key to encrypt the tomb secrets")
-                        .short("k")
-                        .default_value("~/.tomb.key")
-                        .required(true)
                         .takes_value(true),
                 )
                 .arg(
@@ -545,9 +539,6 @@ fn main() {
     let matches = app.get_matches();
 
     match matches.subcommand() {
-        ("genkey", Some(matches)) => {
-            genkey_command(&matches);
-        }
         ("init", Some(matches)) => {
             init_command(&matches);
         }

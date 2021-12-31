@@ -58,7 +58,7 @@ cp target/release/tomb /usr/local/bin/
 
 
 ```bash
-tomb init
+tomb init --ask-password
 ```
 
 ### Add secrets
