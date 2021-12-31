@@ -14,6 +14,8 @@ use tomb::{
     tomb::{app, AES256Tomb},
 };
 
+pub const DEFAULT_TOMB_FILE: &'static str = "~/.tomb.yaml";
+
 pub fn confirm_password() -> Option<String> {
     let password = rpassword::prompt_password_stderr("Password: ").unwrap();
     let confirmation = rpassword::prompt_password_stderr("Confirm password: ").unwrap();
@@ -87,7 +89,7 @@ fn init_command(matches: &ArgMatches) {
     let mut tomb = AES256Tomb::new(tomb_filepath, key.clone(), config.clone());
     match tomb.save() {
         Ok(target) => {
-            logger::out::ok(format!("saved file: {}", target));
+            logger::out::ok(format!("initialized tomb file: {}", target));
         }
         Err(err) => {
             logger::err::error(format!("failed to save tomb file - {}", err));
@@ -138,29 +140,27 @@ fn genkey_command(matches: &ArgMatches) {
 }
 
 fn save_command(matches: &ArgMatches) {
-    let tomb_filepath = matches.value_of("tomb_filename").unwrap();
     let path = matches.value_of("path").expect("missing key path");
     let value = matches.value_of("value").expect("missing value");
     let key = load_key(matches);
     let mut tomb = load_tomb(matches);
     match tomb.add_secret(path, String::from(value), key) {
         Ok(_) => {
-            logger::out::ok(format!("added secret: {}", path));
+            match tomb.save() {
+                Ok(_) => {
+                    logger::out::ok(format!("added secret: {}", path));
+                }
+                Err(err) => {
+                    eprintln!("{}", err);
+                    std::process::exit(1);
+                }
+            };
         }
         Err(err) => {
             eprintln!("{}", err);
             std::process::exit(1);
         }
     }
-    match tomb.save() {
-        Ok(_) => {
-            logger::out::ok(format!("Initialized tomb in: {}", tomb_filepath));
-        }
-        Err(err) => {
-            eprintln!("{}", err);
-            std::process::exit(1);
-        }
-    };
 }
 fn get_command(matches: &ArgMatches) {
     let path = matches.value_of("path").expect("missing key path");
@@ -206,23 +206,21 @@ fn delete_command(matches: &ArgMatches) {
     let mut tomb = load_tomb(matches);
     match tomb.delete_secret(path) {
         Ok(_) => {
-            logger::out::ok(format!("deleted secret: {}", path));
+            match tomb.save() {
+                Ok(_) => {
+                    logger::out::ok(format!("deleted secret: {}", path));
+                }
+                Err(err) => {
+                    eprintln!("{}", err);
+                    std::process::exit(1);
+                }
+            };
         }
         Err(err) => {
             eprintln!("{}", err);
             std::process::exit(1);
         }
     }
-    let tomb_filepath = matches.value_of("tomb_filename").unwrap();
-    match tomb.save() {
-        Ok(_) => {
-            logger::out::ok(format!("saved to: {}", tomb_filepath));
-        }
-        Err(err) => {
-            eprintln!("{}", err);
-            std::process::exit(1);
-        }
-    };
 }
 fn list_command(matches: &ArgMatches) {
     let pattern = matches.value_of("pattern").expect("missing key pattern");
@@ -299,7 +297,7 @@ fn main() {
                         .long("tomb")
                         .short("t")
                         .value_name("FILENAME")
-                        .default_value("~/.tomb.yaml")
+                        .default_value(DEFAULT_TOMB_FILE)
                         .help("the path to the tomb file containing the encrypted secrets")
                         .takes_value(true),
                 )
@@ -382,7 +380,7 @@ fn main() {
                         .long("tomb")
                         .short("t")
                         .value_name("FILENAME")
-                        .default_value("~/.tomb.yaml")
+                        .default_value(DEFAULT_TOMB_FILE)
                         .help("the path to the tomb file containing the encrypted secrets")
                         .takes_value(true),
                 ),
@@ -413,7 +411,7 @@ fn main() {
                         .long("tomb")
                         .short("t")
                         .value_name("FILENAME")
-                        .default_value("~/.tomb.yaml")
+                        .default_value(DEFAULT_TOMB_FILE)
                         .help("the path to the tomb file containing the encrypted secrets")
                         .takes_value(true),
                 ),
@@ -435,7 +433,7 @@ fn main() {
                         .long("tomb")
                         .short("t")
                         .value_name("FILENAME")
-                        .default_value("~/.tomb.yaml")
+                        .default_value(DEFAULT_TOMB_FILE)
                         .help("the path to the tomb file containing the encrypted secrets")
                         .takes_value(true),
                 )
@@ -473,7 +471,7 @@ fn main() {
                         .long("tomb")
                         .short("t")
                         .value_name("FILENAME")
-                        .default_value("~/.tomb.yaml")
+                        .default_value(DEFAULT_TOMB_FILE)
                         .help("the path to the tomb file containing the encrypted secrets")
                         .takes_value(true),
                 )
@@ -502,7 +500,7 @@ fn main() {
                         .long("tomb")
                         .short("t")
                         .value_name("FILENAME")
-                        .default_value("~/.tomb.yaml")
+                        .default_value(DEFAULT_TOMB_FILE)
                         .help("the path to the tomb file containing the encrypted secrets")
                         .takes_value(true),
                 )
@@ -531,7 +529,7 @@ fn main() {
                         .long("tomb")
                         .short("t")
                         .value_name("FILENAME")
-                        .default_value("~/.tomb.yaml")
+                        .default_value(DEFAULT_TOMB_FILE)
                         .help("the path to the tomb file containing the encrypted secrets")
                         .takes_value(true),
                 )
