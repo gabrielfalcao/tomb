@@ -63,8 +63,31 @@ tomb init
 
 ### Add secrets
 
+```bash
 tomb save personal/email/myuser@protonmail.com 'I <3 Nickelback'
 tomb save personal/netflix/myuser@protonmail.com '123456'
 tomb save personal/spotify/myuser@protonmail.com '987654'
-
 ```
+
+
+### List Secrets
+
+```bash
+tomb list
+```
+
+
+### Delete Secrets
+
+```bash
+tomb delete personal/spotify/myuser@protonmail.com
+```
+
+
+### Open UI
+
+```bash
+tomb ui
+```
+
+[![asciicast](https://asciinema.org/a/IhuSX6v9YjszzvkpBLHJfZvBt.svg)](https://asciinema.org/a/IhuSX6v9YjszzvkpBLHJfZvBt)

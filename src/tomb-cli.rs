@@ -7,7 +7,7 @@ use mac_notification_sys::*;
 //use console::style;
 use std::panic;
 use tomb::{
-    aes256cbc::{Config as AesConfig, Key},
+    aes256cbc::{Config as AesConfig, Key, DEFAULT_KEY_PATH},
     //    colors,
     config::YamlFile,
     logger,
@@ -325,6 +325,7 @@ fn main() {
                     Arg::with_name("key_filename")
                         .long("key-filename")
                         .short("k")
+                        .default_value(DEFAULT_KEY_PATH)
                         .required(true)
                         .takes_value(true),
                 )
