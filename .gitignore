@@ -1,0 +1,13 @@
+/*.aes
+/*.key
+/*key*.yaml
+/.*.yaml
+/0b4sk8d*
+/plain.txt
+/target
+/tmp
+/tomb.yaml
+/.idea
+*#*
+*.#*
+*.log
