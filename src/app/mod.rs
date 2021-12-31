@@ -1,4 +1,5 @@
 pub mod components;
+pub mod config;
 pub mod geometry;
 pub mod logging;
 pub mod routes;

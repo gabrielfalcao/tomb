@@ -17,6 +17,12 @@ use std::collections::BTreeMap;
 use std::{borrow::Borrow, fmt};
 pub const DEFAULT_TOMB_PATH: &'static str = "~/.tomb.yaml";
 
+pub fn default_tomb_filename() -> String {
+    match std::env::var("TOMB_FILE") {
+        Ok(filename) => filename,
+        Err(_err) => String::from(DEFAULT_TOMB_PATH),
+    }
+}
 pub fn path_to_md5(path: &str) -> String {
     format!("{:x}", md5::compute(String::from(path).as_bytes()))
 }
@@ -46,7 +52,7 @@ impl fmt::Display for Error {
     }
 }
 
-/// The tomburation for the Key.
+/// The Key struct
 ///
 /// It contains the cycles for key, salt and iv used in key derivation.
 #[derive(PartialEq, Clone, Serialize, Deserialize)]

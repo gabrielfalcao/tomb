@@ -59,6 +59,13 @@ const DIGEST_SIZE: usize = 32;
 ///The path used by `Key::default()` and `Config::default()`
 pub const DEFAULT_KEY_PATH: &'static str = "~/.tomb.key";
 
+pub fn default_key_filename() -> String {
+    match std::env::var("TOMB_KEY") {
+        Ok(filename) => filename,
+        Err(_err) => String::from(DEFAULT_KEY_PATH),
+    }
+}
+
 ///The builtin number of cycles for a key derivation
 pub const KEY_CYCLES: u32 = 16000;
 ///The builtin number of cycles for a salt derivation
