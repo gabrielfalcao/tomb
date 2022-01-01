@@ -58,12 +58,12 @@ const ALGO: &'static str = "aes-256-cbc";
 const DIGEST_SIZE: usize = 32;
 
 ///The path used by `Key::default()` and `Config::default()`
-pub const DEFAULT_KEY_PATH: &'static str = "~/.tomb.key";
+pub const TOMB_KEY: &'static str = "~/.tomb.key";
 
 pub fn default_key_filename() -> String {
     match std::env::var("TOMB_KEY") {
         Ok(filename) => String::from(shellexpand::tilde(&filename)),
-        Err(_err) => String::from(DEFAULT_KEY_PATH),
+        Err(_err) => String::from(TOMB_KEY),
     }
 }
 

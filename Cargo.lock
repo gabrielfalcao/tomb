@@ -2521,6 +2521,7 @@ dependencies = [
  "glob",
  "indicatif",
  "k9",
+ "lazy_static",
  "mac-notification-sys",
  "md5",
  "notify-rust",

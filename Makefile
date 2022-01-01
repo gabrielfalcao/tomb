@@ -3,9 +3,10 @@ TOMB_RELEASE_BIN		:=target/release/tomb
 TOMB_BIN			:=$(TOMB_DEBUG_BIN)
 PASSWORD			:="I <3 Nickelback"
 PLAINTEXT			:="Hello World"
-export TOMB_CONFIG		:= .test-tomb-config.yaml
-export TOMB_KEY			:= .test-tomb-key.yaml
-export TOMB_FILE		:= .test-tomb-file.yaml
+export TOMB_CONFIG		:= .tomb-config.yaml
+export TOMB_KEY			:= .tomb-key.yaml
+export TOMB_FILE		:= .tomb-file.yaml
+export TOMB_LOG			:= .tomb.log
 
 all: fix release
 
@@ -86,6 +87,7 @@ tomb-delete: build cls
 	$(TOMB_BIN) delete temporary-secret
 
 tomb-ui: clean tomb-init tomb-save
+	@gsed 's/cyan/yellow/g' -i $(TOMB_CONFIG)
 	$(TOMB_BIN) ui -T 314
 
 ui:

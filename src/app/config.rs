@@ -11,12 +11,19 @@ use shellexpand;
 use std::fmt;
 use tui::style::Color;
 
-pub const DEFAULT_TOMB_CONFIG_PATH: &'static str = "~/.tomb.config.yaml";
+pub const TOMB_CONFIG: &'static str = "~/.tomb.config.yaml";
+pub const TOMB_LOG: &'static str = "~/.tomb.log";
 
 pub fn default_tomb_config_filename() -> String {
     match std::env::var("TOMB_CONFIG") {
         Ok(filename) => String::from(shellexpand::tilde(&filename)),
-        Err(_error) => String::from(DEFAULT_TOMB_CONFIG_PATH),
+        Err(_error) => String::from(TOMB_CONFIG),
+    }
+}
+pub fn default_log_filename() -> String {
+    match std::env::var("TOMB_LOG") {
+        Ok(filename) => String::from(shellexpand::tilde(&filename)),
+        Err(_error) => String::from(TOMB_LOG),
     }
 }
 #[derive(Debug, Clone)]
@@ -49,6 +56,7 @@ pub struct TombConfig {
     pub ui_color: String,
     pub key_filename: String,
     pub tomb_filename: String,
+    pub log_filename: String,
     pub version: Option<String>,
 }
 
@@ -75,7 +83,12 @@ impl TombConfig {
         }
     }
     pub fn builtin() -> TombConfig {
-        TombConfig::new("cyan", &default_key_filename(), &default_tomb_filename())
+        TombConfig::new(
+            "cyan",
+            &default_key_filename(),
+            &default_tomb_filename(),
+            &default_log_filename(),
+        )
     }
     pub fn load() -> TombConfig {
         TombConfig::default().unwrap_or(TombConfig::builtin())

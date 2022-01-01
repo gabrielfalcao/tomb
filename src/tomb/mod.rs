@@ -16,13 +16,13 @@ use serde::{Deserialize, Serialize};
 use shellexpand;
 use std::collections::BTreeMap;
 use std::fmt;
-pub const DEFAULT_TOMB_PATH: &'static str = "~/.tomb.yaml";
+pub const TOMB_FILE: &'static str = "~/.tomb.yaml";
 
 pub fn default_tomb_filename() -> String {
     match std::env::var("TOMB_FILE") {
         Ok(filename) => String::from(shellexpand::tilde(filename.as_str())),
 
-        Err(_err) => String::from(DEFAULT_TOMB_PATH),
+        Err(_err) => String::from(TOMB_FILE),
     }
 }
 pub fn path_to_md5(path: &str) -> String {
@@ -212,7 +212,7 @@ impl AES256Tomb {
         let filepath = match self.filepath.clone() {
             Some(filepath) => self.export(&filepath)?,
             None => {
-                return Err(Error::with_message(format!("attempt to save tomb that does not have a filepath, falling back to DEFAULT_TOMB_PATH: {}", default_tomb_filename())));
+                return Err(Error::with_message(format!("attempt to save tomb that does not have a filepath, falling back to TOMB_FILE: {}", default_tomb_filename())));
             }
         };
         let new = match AES256Tomb::import(&filepath) {
@@ -234,7 +234,7 @@ impl AES256Tomb {
                 filepath
             }
             None => {
-                log_error(format!("attempt to reload tomb that does not have a filepath, falling back to DEFAULT_TOMB_PATH: {}", default_tomb_filename()));
+                log_error(format!("attempt to reload tomb that does not have a filepath, falling back to TOMB_FILE: {}", default_tomb_filename()));
                 default_tomb_filename()
             }
         };
