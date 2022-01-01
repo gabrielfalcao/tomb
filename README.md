@@ -12,6 +12,15 @@ by PBKDF2 derivation of user-input passwords.
 
 ## Developing
 
+Before running the commands below make sure to install rust in stable version.
+
+### Running
+
+```bash
+make tomb-ui
+```
+
+
 ### "Unit" Testing
 
 ```bash
