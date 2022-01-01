@@ -37,7 +37,7 @@ pub fn rgb_to_color(color: &str) -> Option<Color> {
     }
 }
 pub fn color_default() -> Color {
-    match TombConfig::load().ui_color.to_lowercase().as_str() {
+    match TombConfig::load().color_default.to_lowercase().as_str() {
         "blue" => Color::Blue,
         "cyan" => Color::Cyan,
         "green" => Color::Green,
@@ -49,7 +49,7 @@ pub fn color_default() -> Color {
     }
 }
 pub fn color_light() -> Color {
-    match TombConfig::load().ui_color.to_lowercase().as_str() {
+    match TombConfig::load().color_light.to_lowercase().as_str() {
         "blue" => Color::LightBlue,
         "cyan" => Color::LightCyan,
         "green" => Color::LightGreen,

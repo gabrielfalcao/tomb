@@ -52,7 +52,8 @@ impl fmt::Display for Error {
 
 #[derive(PartialEq, Clone, Serialize, Deserialize)]
 pub struct TombConfig {
-    pub ui_color: String,
+    pub color_default: String,
+    pub color_light: String,
     pub key_filename: String,
     pub tomb_filename: String,
     pub log_filename: String,
@@ -68,14 +69,16 @@ impl YamlFile<Error> for TombConfig {
 impl TombConfig {
     /// Creates a new tomb config in memory
     pub fn new(
-        ui_color: &str,
+        color_default: &str,
+        color_light: &str,
         key_filename: &str,
         tomb_filename: &str,
         log_filename: &str,
     ) -> TombConfig {
         TombConfig {
             version: Some(version()),
-            ui_color: ui_color.to_string(),
+            color_default: color_default.to_string(),
+            color_light: color_light.to_string(),
             key_filename: key_filename.to_string(),
             tomb_filename: tomb_filename.to_string(),
             log_filename: log_filename.to_string(),
@@ -83,7 +86,8 @@ impl TombConfig {
     }
     pub fn builtin() -> TombConfig {
         TombConfig::new(
-            "cyan",
+            "D740B3",
+            "FF6FFC",
             &default_key_filename(),
             &default_tomb_filename(),
             &default_log_filename(),
@@ -91,9 +95,6 @@ impl TombConfig {
     }
     pub fn load() -> TombConfig {
         TombConfig::default().unwrap_or(TombConfig::builtin())
-    }
-    pub fn set_ui_color(&mut self, color: &str) {
-        self.ui_color = color.to_string();
     }
     pub fn save(&mut self) -> Result<(), Error> {
         let filename = default_tomb_config_filename();
