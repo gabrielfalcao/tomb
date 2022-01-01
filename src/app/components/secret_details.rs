@@ -80,6 +80,61 @@ impl<'a> SecretDetails<'a> {
             Err(err) => Err(err),
         }
     }
+    fn create_widget(&mut self, secret: AES256Secret) -> Table<'a> {
+        Table::new(vec![Row::new(vec![
+            Cell::from(Span::raw(format!(
+                "{}",
+                secret
+                    .digest
+                    .iter()
+                    .map(|b| format!("{:02x}", *b))
+                    .collect::<Vec::<_>>()
+                    .join("")
+            ))),
+            Cell::from(Span::raw(secret.path.clone())),
+            Cell::from(Span::raw(match self.visible {
+                true => match self.get_plaintext(&secret.clone()) {
+                    Ok(plaintext) => plaintext,
+                    Err(err) => format!("{}", err),
+                },
+                false => secret.value,
+            })),
+            Cell::from(Span::raw(
+                chrono_humanize::HumanTime::from(secret.updated_at).to_string(),
+            )),
+        ])])
+        .header(Row::new(vec![
+            Cell::from(Span::styled(
+                "digest",
+                Style::default().add_modifier(Modifier::BOLD),
+            )),
+            Cell::from(Span::styled(
+                "name",
+                Style::default().add_modifier(Modifier::BOLD),
+            )),
+            Cell::from(Span::styled(
+                "value",
+                Style::default().add_modifier(Modifier::BOLD),
+            )),
+            Cell::from(Span::styled(
+                "updated at",
+                Style::default().add_modifier(Modifier::BOLD),
+            )),
+        ]))
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .style(Style::default().fg(ui::color_default()))
+                .title("Metadata")
+                .border_type(BorderType::Plain),
+        )
+        .widths(&[
+            Constraint::Percentage(20),
+            Constraint::Percentage(30),
+            Constraint::Percentage(30),
+            Constraint::Percentage(20),
+        ])
+    }
 }
 
 impl Component for SecretDetails<'_> {
@@ -105,62 +160,8 @@ impl Component for SecretDetails<'_> {
         match &self.secret {
             Some(secret) => {
                 let secret = secret.clone();
-                parent.render_widget(
-                    Table::new(vec![Row::new(vec![
-                        Cell::from(Span::raw(format!(
-                            "{}",
-                            secret
-                                .digest
-                                .iter()
-                                .map(|b| format!("{:02x}", *b))
-                                .collect::<Vec::<_>>()
-                                .join("")
-                        ))),
-                        Cell::from(Span::raw(secret.path.clone())),
-                        Cell::from(Span::raw(match self.visible {
-                            true => match self.get_plaintext(&secret.clone()) {
-                                Ok(plaintext) => plaintext,
-                                Err(err) => format!("{}", err),
-                            },
-                            false => secret.value,
-                        })),
-                        Cell::from(Span::raw(
-                            chrono_humanize::HumanTime::from(secret.updated_at).to_string(),
-                        )),
-                    ])])
-                    .header(Row::new(vec![
-                        Cell::from(Span::styled(
-                            "digest",
-                            Style::default().add_modifier(Modifier::BOLD),
-                        )),
-                        Cell::from(Span::styled(
-                            "name",
-                            Style::default().add_modifier(Modifier::BOLD),
-                        )),
-                        Cell::from(Span::styled(
-                            "value",
-                            Style::default().add_modifier(Modifier::BOLD),
-                        )),
-                        Cell::from(Span::styled(
-                            "updated at",
-                            Style::default().add_modifier(Modifier::BOLD),
-                        )),
-                    ]))
-                    .block(
-                        Block::default()
-                            .borders(Borders::ALL)
-                            .style(Style::default().fg(ui::color_default()))
-                            .title("Metadata")
-                            .border_type(BorderType::Plain),
-                    )
-                    .widths(&[
-                        Constraint::Percentage(20),
-                        Constraint::Percentage(30),
-                        Constraint::Percentage(30),
-                        Constraint::Percentage(20),
-                    ]),
-                    chunk,
-                );
+                let widget = self.create_widget(secret);
+                parent.render_widget(widget, chunk);
             }
             None => {
                 parent.render_widget(error_paragraph("", "No secret selected"), chunk);
