@@ -1,4 +1,5 @@
 use super::super::ui;
+use crate::app::ui;
 use crate::ironpunk::*;
 use crossterm::event::{KeyCode, KeyEvent};
 
@@ -113,11 +114,11 @@ impl Component for SearchBox {
     }
 }
 pub fn block_style() -> Style {
-    Style::default()
+    ui::default_style()
         .bg(ui::color_default())
-        .fg(ui::color_text())
+        .fg(ui::color_default_fg())
 }
 
 pub fn paragraph_style() -> Style {
-    Style::default().fg(ui::color_text())
+    ui::default_style().fg(ui::color_default_fg())
 }

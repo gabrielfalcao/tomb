@@ -65,8 +65,12 @@ impl Component for TextField {
     ) -> Result<(), Error> {
         let modal = Block::default()
             .borders(Borders::ALL)
-            .style(block_style())
-            .border_type(BorderType::Rounded);
+            .style(if self.focused {
+                block_style().fg(color_light())
+            } else {
+                block_style()
+            })
+            .border_type(BorderType::Thick);
         let modal = match &self.title {
             Some(title) => modal.title(title.clone()),
             None => modal,

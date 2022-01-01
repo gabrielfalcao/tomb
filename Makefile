@@ -88,10 +88,10 @@ tomb-delete: build cls
 
 tomb-ui: clean tomb-init tomb-save
 	@gsed 's/cyan/yellow/g' -i $(TOMB_CONFIG)
-	$(TOMB_BIN) ui -T 314
+	$(TOMB_BIN) ui -T 1000
 
 ui:
-	cargo run --bin tomb ui -T 400
+	cargo run --bin tomb ui -T 500
 
 obfuskat3: cls 0b4sk8d.yaml
 

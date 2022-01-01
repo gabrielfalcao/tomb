@@ -21,7 +21,7 @@ use super::super::{AES256Secret, AES256Tomb, TombConfig};
 use crate::aes256cbc::{Config as AesConfig, Key};
 
 use clipboard::{ClipboardContext, ClipboardProvider};
-use crossterm::event::{KeyCode, KeyEvent};
+use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
 use std::{io, marker::PhantomData};
 use tui::{
@@ -36,6 +36,12 @@ use tui::{
 const DEFAULT_STATUS: &'static str =
     "'f' to filter / 't' toggle visibility / 'r' reveal / 'c' copy to clipboard";
 
+#[derive(Eq, PartialEq, Clone)]
+pub enum FocusedComponent {
+    Sidebar,
+    Details,
+}
+
 pub struct Application<'a> {
     key: Key,
     tomb: AES256Tomb,
@@ -43,6 +49,7 @@ pub struct Application<'a> {
     tomb_config: TombConfig,
     phantom: PhantomData<&'a List<'a>>,
     started_at: DateTime<Utc>,
+    focused: FocusedComponent,
     pub label: String,
     pub text: String,
     pub error: Option<String>,
@@ -77,6 +84,7 @@ impl<'a> Application<'a> {
             text: String::from("Up/Down browse secrets / 'f' search secrets"),
             label: String::from("Keyboard Shortcuts"),
             visible: false,
+            focused: FocusedComponent::Sidebar,
             pin_visible: false,
             scroll: 0,
             error: None,
@@ -115,7 +123,7 @@ impl<'a> Application<'a> {
             }
         }
     }
-    pub fn render_secrets(&mut self) -> Result<List<'a>, Error> {
+    pub fn render_secret_list(&mut self) -> Result<List<'a>, Error> {
         match self.tomb.reload() {
             // load latest version from disk
             Ok(_) => {}
@@ -123,7 +131,7 @@ impl<'a> Application<'a> {
         };
         let secrets = Block::default()
             .borders(Borders::ALL)
-            .style(Style::default().fg(Color::DarkGray))
+            .style(ui::default_style().fg(ui::color_blurred()))
             .title("Secret")
             .border_type(BorderType::Plain);
         let items: Vec<_> = self
@@ -133,7 +141,7 @@ impl<'a> Application<'a> {
             .map(|secret| {
                 ListItem::new(Spans::from(vec![Span::styled(
                     secret.path.clone(),
-                    Style::default(),
+                    ui::default_style(),
                 )]))
             })
             .collect();
@@ -154,9 +162,12 @@ impl<'a> Application<'a> {
         };
 
         let list = List::new(items).block(secrets).highlight_style(
-            Style::default()
-                .bg(ui::color_default())
-                .fg(ui::color_text()),
+            ui::default_style()
+                .bg(match self.focused {
+                    FocusedComponent::Sidebar => ui::color_default(),
+                    FocusedComponent::Details => ui::color_blurred(),
+                })
+                .fg(ui::color_default_fg()),
         );
 
         Ok(list)
@@ -245,9 +256,40 @@ impl Component for Application<'_> {
                 );
             }
             false => {
+                match code {
+                    KeyCode::Esc => {
+                        self.details.blur();
+                        self.focused = FocusedComponent::Sidebar;
+                    }
+                    KeyCode::Char('q') => {
+                        log_error(format!("tomb closed"));
+                        return Ok(Quit);
+                    }
+                    _ => {}
+                };
+
+                if self.focused == FocusedComponent::Details {
+                    match self.details.process_keyboard(
+                        event,
+                        terminal,
+                        context.clone(),
+                        router.clone(),
+                    ) {
+                        Ok(Quit | Prevent) => {
+                            self.details.blur();
+                            self.focused = FocusedComponent::Sidebar;
+                        }
+                        result => return result,
+                    }
+                }
                 self.menu
                     .process_keyboard(event, terminal, context.clone(), router.clone())?;
                 match code {
+                    KeyCode::Tab => {
+                        self.focused = FocusedComponent::Details;
+                        self.details.tab(event.modifiers == KeyModifiers::SHIFT);
+                        Ok(Propagate)
+                    }
                     KeyCode::Char('q') => {
                         log_error(format!("tomb closed"));
                         Ok(Quit)
@@ -367,7 +409,7 @@ impl Route for Application<'_> {
             // let top_right = overlay_position(body);
             let (sidebar_rect, details_rect) = body_sides(body);
             let location = context.borrow().location.clone();
-            match self.render_secrets() {
+            match self.render_secret_list() {
                 Ok(list) => {
                     rect.render_stateful_widget(list, sidebar_rect, &mut self.items.state);
                     match self.selected_secret() {
@@ -420,12 +462,12 @@ impl Route for Application<'_> {
 
 pub fn status_paragraph<'a>(title: &'a str, content: &'a str) -> Paragraph<'a> {
     Paragraph::new(content)
-        .style(Style::default().fg(ui::color_light()))
+        .style(ui::default_style().fg(ui::color_light()))
         .alignment(Alignment::Center)
         .block(
             Block::default()
                 .borders(Borders::ALL)
-                .style(Style::default().fg(Color::DarkGray))
+                .style(ui::default_style().fg(ui::color_blurred()))
                 .title(title)
                 .border_type(BorderType::Plain),
         )
@@ -444,11 +486,7 @@ pub fn error_text<'a>(label: &'a str, title: &'a str, error: &'a str) -> Paragra
     .block(
         Block::default()
             .borders(Borders::ALL)
-            .style(
-                Style::default()
-                    .bg(ui::color_error_bg())
-                    .fg(ui::color_error_fg()),
-            )
+            .style(ui::error_style())
             .title(label)
             .border_type(BorderType::Plain),
     )

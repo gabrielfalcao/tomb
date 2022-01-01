@@ -37,7 +37,7 @@ pub fn rgb_to_color(color: &str) -> Option<Color> {
     }
 }
 pub fn color_default() -> Color {
-    match TombConfig::load().color_default.to_lowercase().as_str() {
+    match TombConfig::load().colors.default.to_lowercase().as_str() {
         "blue" => Color::Blue,
         "cyan" => Color::Cyan,
         "green" => Color::Green,
@@ -45,11 +45,12 @@ pub fn color_default() -> Color {
         "red" => Color::Red,
         "yellow" => Color::Yellow,
         "gray" => Color::DarkGray,
-        color => rgb_to_color(color).unwrap_or(color_text()),
+        "white" => Color::White,
+        color => rgb_to_color(color).unwrap_or(color_default_fg()),
     }
 }
 pub fn color_light() -> Color {
-    match TombConfig::load().color_light.to_lowercase().as_str() {
+    match TombConfig::load().colors.light.to_lowercase().as_str() {
         "blue" => Color::LightBlue,
         "cyan" => Color::LightCyan,
         "green" => Color::LightGreen,
@@ -57,27 +58,90 @@ pub fn color_light() -> Color {
         "red" => Color::LightRed,
         "yellow" => Color::LightYellow,
         "gray" => Color::Gray,
+        "white" => Color::White,
         color => rgb_to_color(color).unwrap_or(color_blurred()),
     }
 }
 pub fn color_blurred() -> Color {
-    Color::DarkGray
+    match TombConfig::load().colors.blurred.to_lowercase().as_str() {
+        "blue" => Color::Blue,
+        "cyan" => Color::Cyan,
+        "green" => Color::Green,
+        "magenta" => Color::Magenta,
+        "red" => Color::Red,
+        "yellow" => Color::Yellow,
+        "gray" => Color::DarkGray,
+        "white" => Color::White,
+        color => rgb_to_color(color).unwrap_or(Color::DarkGray),
+    }
+}
+pub fn color_default_fg() -> Color {
+    match TombConfig::load().colors.default_fg.to_lowercase().as_str() {
+        "blue" => Color::LightBlue,
+        "cyan" => Color::LightCyan,
+        "green" => Color::LightGreen,
+        "magenta" => Color::LightMagenta,
+        "red" => Color::LightRed,
+        "yellow" => Color::LightYellow,
+        "gray" => Color::White,
+        "white" => Color::White,
+        color => rgb_to_color(color).unwrap_or(Color::White),
+    }
+}
+pub fn color_default_bg() -> Color {
+    match TombConfig::load().colors.default_bg.to_lowercase().as_str() {
+        "blue" => Color::Blue,
+        "cyan" => Color::Cyan,
+        "green" => Color::Green,
+        "magenta" => Color::Magenta,
+        "red" => Color::Red,
+        "yellow" => Color::Yellow,
+        "gray" => Color::DarkGray,
+        "white" => Color::White,
+        color => rgb_to_color(color).unwrap_or(Color::Rgb(10, 10, 10)),
+    }
 }
 
-pub fn color_text() -> Color {
-    Color::White
+pub fn color_error_fg() -> Color {
+    match TombConfig::load().colors.error_fg.to_lowercase().as_str() {
+        "blue" => Color::LightBlue,
+        "cyan" => Color::LightCyan,
+        "green" => Color::LightGreen,
+        "magenta" => Color::LightMagenta,
+        "red" => Color::LightRed,
+        "yellow" => Color::LightYellow,
+        "gray" => Color::Rgb(155, 155, 155),
+        "white" => Color::White,
+        color => rgb_to_color(color).unwrap_or(Color::Rgb(155, 155, 155)),
+    }
 }
 pub fn color_error_bg() -> Color {
-    Color::Rgb(0, 0, 0)
+    match TombConfig::load().colors.error_bg.to_lowercase().as_str() {
+        "blue" => Color::Blue,
+        "cyan" => Color::Cyan,
+        "green" => Color::Green,
+        "magenta" => Color::Magenta,
+        "red" => Color::Red,
+        "yellow" => Color::Yellow,
+        "gray" => Color::DarkGray,
+        "white" => Color::White,
+        color => rgb_to_color(color).unwrap_or(Color::Rgb(10, 10, 10)),
+    }
 }
-pub fn color_error_fg() -> Color {
-    Color::Rgb(155, 155, 155)
+
+pub fn default_style() -> Style {
+    Style::default()
+        .bg(color_default_bg())
+        .fg(color_default_fg())
+}
+pub fn error_style() -> Style {
+    Style::default().bg(color_error_bg()).fg(color_error_fg())
 }
 
 pub fn block_style() -> Style {
-    Style::default().fg(color_default())
+    default_style().fg(color_default())
 }
 
 pub fn paragraph_style() -> Style {
-    Style::default().fg(color_blurred())
+    default_style().fg(color_blurred())
 }

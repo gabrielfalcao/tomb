@@ -51,9 +51,31 @@ impl fmt::Display for Error {
 }
 
 #[derive(PartialEq, Clone, Serialize, Deserialize)]
+pub struct ColorTheme {
+    pub default: String,
+    pub light: String,
+    pub blurred: String,
+    pub default_fg: String,
+    pub default_bg: String,
+    pub error_fg: String,
+    pub error_bg: String,
+}
+impl ColorTheme {
+    pub fn builtin() -> ColorTheme {
+        ColorTheme {
+            default: "995500".to_string(),
+            light: "FFCC00".to_string(),
+            blurred: "gray".to_string(),
+            default_fg: "FFFFFF".to_string(),
+            default_bg: "101010".to_string(),
+            error_fg: "9B9B9B".to_string(),
+            error_bg: "101010".to_string(),
+        }
+    }
+}
+#[derive(PartialEq, Clone, Serialize, Deserialize)]
 pub struct TombConfig {
-    pub color_default: String,
-    pub color_light: String,
+    pub colors: ColorTheme,
     pub key_filename: String,
     pub tomb_filename: String,
     pub log_filename: String,
@@ -69,28 +91,25 @@ impl YamlFile<Error> for TombConfig {
 impl TombConfig {
     /// Creates a new tomb config in memory
     pub fn new(
-        color_default: &str,
-        color_light: &str,
         key_filename: &str,
         tomb_filename: &str,
         log_filename: &str,
+        colors: ColorTheme,
     ) -> TombConfig {
         TombConfig {
             version: Some(version()),
-            color_default: color_default.to_string(),
-            color_light: color_light.to_string(),
             key_filename: key_filename.to_string(),
             tomb_filename: tomb_filename.to_string(),
             log_filename: log_filename.to_string(),
+            colors,
         }
     }
     pub fn builtin() -> TombConfig {
         TombConfig::new(
-            "995500",
-            "FFCC00",
             &default_key_filename(),
             &default_tomb_filename(),
             &default_log_filename(),
+            ColorTheme::builtin(),
         )
     }
     pub fn load() -> TombConfig {

@@ -87,6 +87,27 @@ impl AES256Secret {
     pub fn key(&self) -> String {
         path_to_md5(self.path.as_str())
     }
+    pub fn name(&self) -> String {
+        let parts = self.path.split('/').collect::<Vec<&str>>();
+        parts[parts.len() - 1].to_string()
+    }
+    pub fn group(&self) -> String {
+        let parts = self.path.split('/').collect::<Vec<&str>>();
+        if parts.len() > 1 {
+            let group = parts[0..parts.len() - 1].join("/");
+            if group.len() > 0 {
+                if group.starts_with("/") {
+                    group
+                } else {
+                    format!("/{}", group)
+                }
+            } else {
+                String::from("/")
+            }
+        } else {
+            String::from("/")
+        }
+    }
     pub fn set_notes(&mut self, notes: Option<String>) {
         self.notes = notes;
     }

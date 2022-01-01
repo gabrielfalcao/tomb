@@ -5,9 +5,9 @@
 pub use super::super::components::{menu::Menu, modal::Modal, searchbox::SearchBox};
 pub use super::super::form::{Form, TextField};
 use super::super::geometry::*;
-use super::super::log_error;
 pub use super::super::state::*;
 use super::super::ui;
+use crate::app::log_error;
 use chrono::prelude::*;
 
 use crate::ironpunk::*;
@@ -19,7 +19,7 @@ use super::super::{AES256Secret, AES256Tomb, TombConfig};
 use crate::aes256cbc::{Config as AesConfig, Key};
 
 use clipboard::{ClipboardContext, ClipboardProvider};
-use crossterm::event::{KeyCode, KeyEvent};
+use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
 use std::{io, marker::PhantomData};
 use tui::{
@@ -37,6 +37,7 @@ pub struct SecretDetails<'a> {
     secret: Option<AES256Secret>,
     tomb_config: TombConfig,
     visible: bool,
+    form: Form,
     phantom: PhantomData<&'a List<'a>>,
 }
 
@@ -54,6 +55,11 @@ impl<'a> SecretDetails<'a> {
             secret,
             tomb_config,
             visible,
+            form: Form::new(
+                "secret-details",
+                Some(String::from("Details Title")),
+                Vec::new(),
+            ),
             phantom: PhantomData,
         }
     }
@@ -62,6 +68,12 @@ impl<'a> SecretDetails<'a> {
     }
     pub fn set_secret(&mut self, secret: AES256Secret) {
         self.secret = Some(secret);
+    }
+    pub fn tab(&mut self, shift: bool) {
+        self.form.tab(shift);
+    }
+    pub fn blur(&mut self) {
+        self.form.blur();
     }
     pub fn selected_secret(&mut self) -> Result<AES256Secret, Error> {
         match &self.secret {
@@ -81,7 +93,11 @@ impl<'a> SecretDetails<'a> {
             Err(err) => Err(err),
         }
     }
-    fn create_form(&mut self, secret: AES256Secret) -> Form {
+    fn populate_form(&mut self, secret: AES256Secret) {
+        if self.form.fields.len() > 0 {
+            // form already populated
+            return;
+        }
         let digest = secret
             .digest
             .iter()
@@ -89,12 +105,9 @@ impl<'a> SecretDetails<'a> {
             .collect::<Vec<_>>()
             .join("");
 
-        let mut form = Form::new(
-            "secret-details",
-            Some(String::from("Details Title")),
-            Vec::new(),
-        );
-        let field_path = TextField::new("secret-path-field", "path", secret.path.clone(), true);
+        let field_name = TextField::new("secret-name-field", "name", secret.name(), true);
+        let field_group = TextField::new("secret-group-field", "group", secret.group(), true);
+
         let field_digest =
             TextField::new("secret-digest-field", "digest", format!("{}", digest), true);
         let field_value = TextField::new(
@@ -128,12 +141,12 @@ impl<'a> SecretDetails<'a> {
             true,
         );
 
-        form.add_field(field_digest);
-        form.add_field(field_path);
-        form.add_field(field_value);
-        form.add_field(field_updated_at);
-        form.add_field(field_notes);
-        form
+        self.form.add_field(field_name);
+        self.form.add_field(field_group);
+        self.form.add_field(field_value);
+        self.form.add_field(field_updated_at);
+        self.form.add_field(field_digest);
+        self.form.add_field(field_notes);
     }
 }
 
@@ -160,8 +173,8 @@ impl Component for SecretDetails<'_> {
         match &self.secret {
             Some(secret) => {
                 let secret = secret.clone();
-                let mut form = self.create_form(secret);
-                form.render_in_parent(parent, chunk)?;
+                self.populate_form(secret);
+                self.form.render_in_parent(parent, chunk)?;
             }
             None => {
                 parent.render_widget(error_paragraph("", "No secret selected"), chunk);
@@ -169,6 +182,7 @@ impl Component for SecretDetails<'_> {
         }
         Ok(())
     }
+
     fn process_keyboard(
         &mut self,
         event: KeyEvent,
@@ -176,18 +190,28 @@ impl Component for SecretDetails<'_> {
         context: SharedContext,
         router: SharedRouter,
     ) -> Result<LoopEvent, Error> {
-        let code = event.code;
-        Ok(Propagate)
+        match event.code {
+            KeyCode::Down => {
+                self.form.tab(false);
+                Ok(Propagate)
+            }
+            KeyCode::Up => {
+                self.form.tab(true);
+                Ok(Propagate)
+            }
+            KeyCode::Tab => Ok(Prevent),
+            _ => Ok(Propagate),
+        }
     }
 }
 pub fn error_paragraph<'a>(title: &'a str, content: &'a str) -> Paragraph<'a> {
     Paragraph::new(content)
-        .style(Style::default().fg(ui::color_light()))
+        .style(ui::default_style().fg(ui::color_light()))
         .alignment(Alignment::Center)
         .block(
             Block::default()
                 .borders(Borders::ALL)
-                .style(Style::default().fg(Color::DarkGray))
+                .style(ui::error_style())
                 .title(title)
                 .border_type(BorderType::Plain),
         )

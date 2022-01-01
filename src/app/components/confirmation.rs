@@ -97,38 +97,50 @@ impl<'a> Component for ConfirmationDialog<'a> {
         let button_yes = Paragraph::new(vec![Spans::from(Span::styled(
             format!("Yes, delete"),
             match self.selected {
-                Yes => Style::default()
+                Yes => ui::default_style()
                     .bg(Color::LightGreen)
-                    .fg(ui::color_text())
+                    .fg(ui::color_default_fg())
                     .add_modifier(Modifier::UNDERLINED),
-                No => Style::default().bg(Color::Green).fg(ui::color_text()),
+                No => ui::default_style()
+                    .bg(Color::Green)
+                    .fg(ui::color_default_fg()),
             },
         ))])
         .block(
             Block::default()
                 .borders(Borders::ALL)
                 .style(match self.selected {
-                    Yes => Style::default().bg(Color::LightGreen).fg(ui::color_text()),
-                    No => Style::default().bg(Color::Green).fg(ui::color_text()),
+                    Yes => ui::default_style()
+                        .bg(Color::LightGreen)
+                        .fg(ui::color_default_fg()),
+                    No => ui::default_style()
+                        .bg(Color::Green)
+                        .fg(ui::color_default_fg()),
                 }),
         )
         .alignment(Alignment::Center);
         let button_no = Paragraph::new(vec![Spans::from(Span::styled(
             format!("No, cancel"),
             match self.selected {
-                No => Style::default()
+                No => ui::default_style()
                     .bg(Color::LightRed)
-                    .fg(ui::color_text())
+                    .fg(ui::color_default_fg())
                     .add_modifier(Modifier::UNDERLINED),
-                Yes => Style::default().bg(Color::Red).fg(ui::color_text()),
+                Yes => ui::default_style()
+                    .bg(Color::Red)
+                    .fg(ui::color_default_fg()),
             },
         ))])
         .block(
             Block::default()
                 .borders(Borders::ALL)
                 .style(match self.selected {
-                    No => Style::default().bg(Color::LightRed).fg(ui::color_text()),
-                    Yes => Style::default().bg(Color::Red).fg(ui::color_text()),
+                    No => ui::default_style()
+                        .bg(Color::LightRed)
+                        .fg(ui::color_default_fg()),
+                    Yes => ui::default_style()
+                        .bg(Color::Red)
+                        .fg(ui::color_default_fg()),
                 }),
         )
         .alignment(Alignment::Center);
@@ -187,14 +199,16 @@ pub fn horizontal_split(size: Rect) -> (Rect, Rect) {
     (left, right)
 }
 pub fn paragraph_style() -> Style {
-    Style::default().fg(Color::Black)
+    ui::default_style().bg(Color::White).fg(Color::Black)
 }
 pub fn highlight_style() -> Style {
-    Style::default()
+    ui::default_style()
         .fg(Color::Red)
         .add_modifier(Modifier::UNDERLINED)
 }
 
 pub fn block_style() -> Style {
-    Style::default().bg(ui::color_text()).fg(Color::Black)
+    ui::default_style()
+        .bg(ui::color_default_fg())
+        .fg(Color::Black)
 }

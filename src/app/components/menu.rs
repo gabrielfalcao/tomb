@@ -1,4 +1,6 @@
-//use super::super::logging::log_error;
+#![allow(unused_variables)]
+#![allow(unused_imports)]
+
 use super::super::ui;
 use crate::ironpunk::*;
 use crossterm::event::{KeyCode, KeyEvent};
@@ -166,19 +168,19 @@ impl Menu {
                 Spans::from(vec![
                     Span::styled(
                         first,
-                        Style::default()
+                        ui::default_style()
                             .fg(ui::color_default())
                             .add_modifier(Modifier::UNDERLINED),
                     ),
-                    Span::styled(rest, Style::default().fg(Color::DarkGray)),
+                    Span::styled(rest, ui::default_style().fg(ui::color_blurred())),
                 ])
             })
             .collect();
         let tabs = Tabs::new(menu)
             .select(self.selected_index())
             .block(Block::default().title("Menu").borders(Borders::ALL))
-            .style(Style::default().fg(Color::DarkGray))
-            .highlight_style(Style::default().fg(ui::color_light()))
+            .style(ui::default_style().fg(ui::color_blurred()))
+            .highlight_style(ui::default_style().fg(ui::color_light()))
             .divider(Span::raw("|"));
 
         parent.render_widget(tabs, chunk);
@@ -194,7 +196,6 @@ impl Component for Menu {
         self.cid.clone()
     }
 
-    #[allow(unused_variables)]
     fn process_keyboard(
         &mut self,
         event: KeyEvent,
