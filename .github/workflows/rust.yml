@@ -1,4 +1,4 @@
-name: CI
+yname: CI
 
 on:
   - push
@@ -6,7 +6,7 @@ on:
 
 jobs:
   cargo_test:
-    name: Cargo Test
+    name: Cargo
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -22,39 +22,39 @@ jobs:
         with:
           command: doc
 
-  e2e_test:
-    name: End-to-end Test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-      - name: e2e tests
-        run: make test
+  # e2e_test:
+  #   name: End-to-end Test
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: actions-rs/toolchain@v1
+  #       with:
+  #         toolchain: stable
+  #     - name: e2e tests
+  #       run: make test
 
-  load_test:
-    name: Load Test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-      - name: load tests
-        run: make load
+  # load_test:
+  #   name: Load Test
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: actions-rs/toolchain@v1
+  #       with:
+  #         toolchain: stable
+  #     - name: load tests
+  #       run: make load
 
 
-  build_release:
-    name: Build Release
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-      - name: build release
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --release --all-features
+  # build_release:
+  #   name: Build Release
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: actions-rs/toolchain@v1
+  #       with:
+  #         toolchain: stable
+  #     - name: build release
+  #       uses: actions-rs/cargo@v1
+  #       with:
+  #         command: test
+  #         args: --release --all-features
