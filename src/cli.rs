@@ -186,7 +186,6 @@ fn get_command(matches: &ArgMatches) {
 }
 fn copy_command(matches: &ArgMatches) {
     let path = matches.value_of("path").expect("missing key path");
-    let sound = matches.value_of("sound").unwrap_or("Glass");
     let key = load_key(matches);
     let tomb = load_tomb(matches);
     match tomb.get_string(path, key) {
@@ -196,13 +195,16 @@ fn copy_command(matches: &ArgMatches) {
             eprintln!("{} secret copied to clipboard 🎉", path);
 
             #[cfg(feature = "osx")]
-            send_notification(
-                format!("{} secret", path).as_str(),
-                &Some("copied to clipboard 🎉"),
-                "",
-                &Some(sound),
-            )
-            .unwrap();
+            {
+                let sound = matches.value_of("sound").unwrap_or("Glass");
+                send_notification(
+                    format!("{} secret", path).as_str(),
+                    &Some("copied to clipboard 🎉"),
+                    "",
+                    &Some(sound),
+                )
+                .unwrap();
+            }
         }
         Err(err) => {
             eprintln!("{}", err);
