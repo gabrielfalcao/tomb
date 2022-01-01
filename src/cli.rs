@@ -3,6 +3,7 @@ use clap::{App, AppSettings, Arg, ArgMatches, SubCommand};
 use clipboard::ClipboardContext;
 use clipboard::ClipboardProvider;
 use console::style;
+#[cfg(feature = "osx")]
 use mac_notification_sys::*;
 use std::path::Path;
 //use console::style;
@@ -193,6 +194,8 @@ fn copy_command(matches: &ArgMatches) {
             let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
             ctx.set_contents(plaintext).unwrap();
             eprintln!("{} secret copied to clipboard 🎉", path);
+
+            #[cfg(feature = "osx")]
             send_notification(
                 format!("{} secret", path).as_str(),
                 &Some("copied to clipboard 🎉"),
