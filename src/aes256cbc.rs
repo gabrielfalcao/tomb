@@ -171,7 +171,7 @@ pub struct Config {
 
 impl YamlFile<Error> for Config {
     fn default() -> Result<Config, Error> {
-        Ok(Config::builtin(Some(DEFAULT_KEY_PATH.to_string())))
+        Ok(Config::builtin(Some(default_key_filename().to_string())))
     }
 }
 impl Config {
@@ -233,7 +233,7 @@ pub struct Key {
 }
 impl YamlFile<Error> for Key {
     fn default() -> Result<Key, Error> {
-        let filename = shellexpand::tilde(DEFAULT_KEY_PATH);
+        let filename = default_key_filename();
         Key::import(filename.borrow())
     }
 }

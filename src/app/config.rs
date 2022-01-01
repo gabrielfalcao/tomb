@@ -8,7 +8,7 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 use shellexpand;
-use std::{borrow::Borrow, fmt};
+use std::fmt;
 use tui::style::Color;
 
 pub const DEFAULT_TOMB_CONFIG_PATH: &'static str = "~/.tomb.config.yaml";
@@ -51,21 +51,27 @@ pub struct TombConfig {
     pub tomb_filename: String,
     pub version: Option<String>,
 }
+
 impl YamlFile<Error> for TombConfig {
     fn default() -> Result<TombConfig, Error> {
-        let filename = shellexpand::tilde(DEFAULT_TOMB_CONFIG_PATH);
-        TombConfig::import(filename.borrow())
+        TombConfig::import(default_tomb_config_filename().as_str())
     }
 }
 
 impl TombConfig {
     /// Creates a new tomb config in memory
-    pub fn new(ui_color: &str, key_filename: &str, tomb_filename: &str) -> TombConfig {
+    pub fn new(
+        ui_color: &str,
+        key_filename: &str,
+        tomb_filename: &str,
+        log_filename: &str,
+    ) -> TombConfig {
         TombConfig {
             version: Some(version()),
             ui_color: ui_color.to_string(),
             key_filename: key_filename.to_string(),
             tomb_filename: tomb_filename.to_string(),
+            log_filename: log_filename.to_string(),
         }
     }
     pub fn builtin() -> TombConfig {

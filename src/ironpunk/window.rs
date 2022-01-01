@@ -10,14 +10,14 @@ use tui::Terminal;
 pub struct Window<'a> {
     pub router: SharedRouter,
     pub context: Context<'a>,
-    _phantom: PhantomData<&'a Context<'a>>,
+    phantom: PhantomData<&'a Context<'a>>,
 }
 
 impl<'a> Window<'a> {
     pub fn from_routes(router: SharedRouter) -> Window<'a> {
         Window {
             router,
-            _phantom: PhantomData,
+            phantom: PhantomData,
             context: Context::new("/"),
         }
     }

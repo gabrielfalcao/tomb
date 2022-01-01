@@ -15,7 +15,7 @@ use md5;
 use serde::{Deserialize, Serialize};
 use shellexpand;
 use std::collections::BTreeMap;
-use std::{borrow::Borrow, fmt};
+use std::fmt;
 pub const DEFAULT_TOMB_PATH: &'static str = "~/.tomb.yaml";
 
 pub fn default_tomb_filename() -> String {
@@ -185,8 +185,7 @@ pub struct AES256Tomb {
 }
 impl YamlFile<Error> for AES256Tomb {
     fn default() -> Result<AES256Tomb, Error> {
-        let filename = shellexpand::tilde(DEFAULT_TOMB_PATH);
-        AES256Tomb::import(filename.borrow())
+        AES256Tomb::import(default_tomb_filename().as_str())
     }
 }
 
@@ -213,7 +212,7 @@ impl AES256Tomb {
         let filepath = match self.filepath.clone() {
             Some(filepath) => self.export(&filepath)?,
             None => {
-                return Err(Error::with_message(format!("attempt to save tomb that does not have a filepath, falling back to DEFAULT_TOMB_PATH: {}", DEFAULT_TOMB_PATH)));
+                return Err(Error::with_message(format!("attempt to save tomb that does not have a filepath, falling back to DEFAULT_TOMB_PATH: {}", default_tomb_filename())));
             }
         };
         let new = match AES256Tomb::import(&filepath) {
@@ -235,8 +234,8 @@ impl AES256Tomb {
                 filepath
             }
             None => {
-                log_error(format!("attempt to reload tomb that does not have a filepath, falling back to DEFAULT_TOMB_PATH: {}", DEFAULT_TOMB_PATH));
-                String::from(DEFAULT_TOMB_PATH)
+                log_error(format!("attempt to reload tomb that does not have a filepath, falling back to DEFAULT_TOMB_PATH: {}", default_tomb_filename()));
+                default_tomb_filename()
             }
         };
         let new = match AES256Tomb::import(&filepath) {
