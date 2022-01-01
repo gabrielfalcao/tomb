@@ -1,5 +1,5 @@
-#![allow(unused_variables)]
 #![allow(unused_imports)]
+#![allow(unused_variables)]
 #![allow(dead_code)]
 
 use crate::ironpunk::*;
@@ -16,47 +16,48 @@ use tui::{
 };
 
 #[derive(Debug, Clone)]
-pub struct Modal {
-    pub title: String,
-    pub text: String,
-    active: bool,
+pub struct TextField {
+    pub title: Option<String>,
+    pub value: String,
+    pub id: String,
+    buf: String, // editable buffer
+    focused: bool,
+    read_only: bool,
 }
-/// Modal with editable content
-impl Modal {
-    pub fn new(title: &str, text: &str) -> Modal {
-        Modal {
-            title: String::from(title),
-            text: String::from(text),
-            active: true,
+/// TextField with editable content
+impl TextField {
+    pub fn new(id: &str, title: &str, value: &str, read_only: bool) -> TextField {
+        TextField {
+            id: String::from(id),
+            title: Some(String::from(title)),
+            value: String::from(value),
+            focused: false,
+            buf: String::new(),
+            read_only: read_only,
         }
     }
     pub fn set_title(&mut self, title: &str) {
-        self.title = String::from(title);
+        self.title = Some(String::from(title));
     }
-    pub fn set_text(&mut self, text: &str) {
-        self.text = String::from(text);
+    pub fn remove_title(&mut self) {
+        self.title = None;
+    }
+    pub fn set_value(&mut self, value: &str) {
+        self.value = String::from(value);
     }
     pub fn write(&mut self, c: char) {
-        self.text.push(c);
+        self.buf.push(c);
     }
     pub fn backspace(&mut self) {
-        self.text.pop();
-    }
-
-    pub fn is_active(&self) -> bool {
-        self.active
-    }
-    pub fn deactivate(&mut self) {
-        self.active = false;
+        self.buf.pop();
     }
 }
-
-impl Component for Modal {
+impl Component for TextField {
     fn name(&self) -> &str {
-        "Modal"
+        "TextField"
     }
     fn id(&self) -> String {
-        self.text.clone()
+        self.id.clone()
     }
     fn render_in_parent(
         &mut self,
@@ -67,11 +68,13 @@ impl Component for Modal {
         let modal = Block::default()
             .borders(Borders::ALL)
             .style(block_style())
-            .title(self.title.clone())
             .border_type(BorderType::Rounded);
-
+        let modal = match &self.title {
+            Some(title) => modal.title(title.clone()),
+            None => modal,
+        };
         let text = vec![Spans::from(Span::styled(
-            self.text.clone(),
+            self.value.clone(),
             paragraph_style(),
         ))];
         let paragraph = Paragraph::new(text)
@@ -98,7 +101,7 @@ impl Component for Modal {
                 Ok(Propagate)
             }
             KeyCode::Esc => {
-                self.deactivate();
+                self.blur();
                 return Ok(Propagate);
             }
             KeyCode::Enter => {
@@ -113,6 +116,21 @@ impl Component for Modal {
         }
     }
 }
+impl Focusable for TextField {
+    fn tab_index(&self) -> usize {
+        0
+    }
+    fn is_focused(&self) -> bool {
+        self.focused
+    }
+    fn focus(&mut self) {
+        self.focused = true;
+    }
+    fn blur(&mut self) {
+        self.focused = false;
+    }
+}
+
 pub fn block_style() -> Style {
     Style::default().bg(Color::DarkGray).fg(Color::White)
 }

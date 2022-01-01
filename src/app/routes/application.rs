@@ -1,9 +1,15 @@
-pub use super::super::components::{menu::Menu, modal::Modal, searchbox::SearchBox};
+#![allow(unused_imports)]
+#![allow(unused_variables)]
+#![allow(dead_code)]
+
+pub use super::super::components::{
+    menu::Menu, modal::Modal, searchbox::SearchBox, secret_details::SecretDetails,
+};
 use super::super::geometry::*;
 use super::super::log_error;
+
 pub use super::super::state::*;
 use super::super::ui;
-use crate::ioutils::log_to_file;
 use chrono::prelude::*;
 
 use crate::ironpunk::*;
@@ -30,10 +36,6 @@ use tui::{
 const DEFAULT_STATUS: &'static str =
     "'f' to filter / 't' toggle visibility / 'r' reveal / 'c' copy to clipboard";
 
-pub fn log(message: String) {
-    log_to_file("application.log", message).unwrap()
-}
-#[allow(dead_code)]
 pub struct Application<'a> {
     key: Key,
     tomb: AES256Tomb,
@@ -48,6 +50,7 @@ pub struct Application<'a> {
     pub pin_visible: bool,
     pub menu: Menu,
     pub searchbox: SearchBox,
+    pub details: SecretDetails<'a>,
     pub scroll: u16,
     pub items: StatefulList,
 }
@@ -60,10 +63,13 @@ impl<'a> Application<'a> {
         aes_config: AesConfig,
     ) -> Application<'a> {
         log_error(format!("tomb opened"));
+        let details =
+            SecretDetails::new(key.clone(), tomb.clone(), None, tomb_config.clone(), false);
         Application {
             key,
             tomb,
             aes_config,
+            details,
             tomb_config,
             menu: Menu::default("Secrets"),
             searchbox: SearchBox::new("*"),
@@ -109,7 +115,7 @@ impl<'a> Application<'a> {
             }
         }
     }
-    pub fn render_secrets(&mut self) -> Result<(List<'a>, Table<'a>), Error> {
+    pub fn render_secrets(&mut self) -> Result<List<'a>, Error> {
         match self.tomb.reload() {
             // load latest version from disk
             Ok(_) => {}
@@ -152,61 +158,9 @@ impl<'a> Application<'a> {
             .highlight_style(Style::default().bg(ui::color_default()).fg(Color::White));
 
         let secret = selected_secret.clone();
-        let secret_detail = Table::new(vec![Row::new(vec![
-            Cell::from(Span::raw(format!(
-                "{}",
-                selected_secret
-                    .digest
-                    .iter()
-                    .map(|b| format!("{:02x}", *b))
-                    .collect::<Vec::<_>>()
-                    .join("")
-            ))),
-            Cell::from(Span::raw(selected_secret.path)),
-            Cell::from(Span::raw(match self.visible {
-                true => match self.get_plaintext(&secret) {
-                    Ok(plaintext) => plaintext,
-                    Err(err) => format!("{}", err),
-                },
-                false => secret.value,
-            })),
-            Cell::from(Span::raw(
-                chrono_humanize::HumanTime::from(selected_secret.updated_at).to_string(),
-            )),
-        ])])
-        .header(Row::new(vec![
-            Cell::from(Span::styled(
-                "digest",
-                Style::default().add_modifier(Modifier::BOLD),
-            )),
-            Cell::from(Span::styled(
-                "name",
-                Style::default().add_modifier(Modifier::BOLD),
-            )),
-            Cell::from(Span::styled(
-                "value",
-                Style::default().add_modifier(Modifier::BOLD),
-            )),
-            Cell::from(Span::styled(
-                "updated at",
-                Style::default().add_modifier(Modifier::BOLD),
-            )),
-        ]))
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .style(Style::default().fg(ui::color_default()))
-                .title("Metadata")
-                .border_type(BorderType::Plain),
-        )
-        .widths(&[
-            Constraint::Percentage(20),
-            Constraint::Percentage(30),
-            Constraint::Percentage(30),
-            Constraint::Percentage(20),
-        ]);
-
-        Ok((list, secret_detail))
+        self.details.set_visible(self.visible);
+        self.details.set_secret(secret);
+        Ok(list)
     }
     pub fn search_visible(&self) -> bool {
         self.searchbox.visible
@@ -214,7 +168,6 @@ impl<'a> Application<'a> {
     pub fn set_text(&mut self, text: &str) {
         self.text = String::from(text);
     }
-    #[allow(dead_code)]
     pub fn set_error(&mut self, error: String) {
         self.error = Some(error.clone());
     }
@@ -268,14 +221,13 @@ impl Component for Application<'_> {
     }
     fn tick(
         &mut self,
-        _terminal: &mut Terminal<Backend>,
-        _context: SharedContext,
-        _router: SharedRouter,
+        terminal: &mut Terminal<Backend>,
+        context: SharedContext,
+        router: SharedRouter,
     ) -> Result<LoopEvent, Error> {
         Ok(Propagate)
     }
 
-    #[allow(unused_variables)]
     fn process_keyboard(
         &mut self,
         event: KeyEvent,
@@ -408,18 +360,20 @@ impl Route for Application<'_> {
         &mut self,
         terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
         context: SharedContext,
-        _router: SharedRouter,
+        router: SharedRouter,
     ) -> Result<(), Error> {
         terminal.draw(|rect| {
             let (top, body, footer) = vertical_stack(rect.size());
             let (_top_left, top_right) = body_sides(top);
             // let top_right = overlay_position(body);
-            let (sidebar, detail) = body_sides(body);
+            let (sidebar_rect, details_rect) = body_sides(body);
             let location = context.borrow().location.clone();
             match self.render_secrets() {
-                Ok((left, right)) => {
-                    rect.render_stateful_widget(left, sidebar, &mut self.items.state);
-                    rect.render_widget(right, detail);
+                Ok(list) => {
+                    rect.render_stateful_widget(list, sidebar_rect, &mut self.items.state);
+                    self.details
+                        .render_in_parent(rect, details_rect)
+                        .expect("failed to render details for secret");
                 }
                 Err(error) => {
                     let error =

@@ -1,77 +1,52 @@
-#![allow(unused_variables)]
-#![allow(unused_imports)]
-#![allow(dead_code)]
-
+use super::super::ui;
 use crate::ironpunk::*;
+use crossterm::event::{KeyCode, KeyEvent};
 
-use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use std::io;
 use tui::{
     backend::CrosstermBackend,
-    layout::{Alignment, Constraint, Direction, Layout, Rect},
-    style::{Color, Modifier, Style},
+    layout::{Alignment, Rect},
+    style::{Color, Style},
     text::{Span, Spans},
     widgets::{Block, BorderType, Borders, Paragraph, Wrap},
     Frame, Terminal,
 };
 
-#[derive(Debug, Clone)]
-pub struct Modal {
-    pub title: String,
-    pub text: String,
-    active: bool,
+#[derive(PartialEq, Clone)]
+pub struct SearchBox {
+    pub pattern: String,
+    pub tmp: String,
+    pub visible: bool,
 }
-/// Modal with editable content
-impl Modal {
-    pub fn new(title: &str, text: &str) -> Modal {
-        Modal {
-            title: String::from(title),
-            text: String::from(text),
-            active: true,
+impl SearchBox {
+    pub fn new(pattern: &str) -> SearchBox {
+        let pattern = String::from(pattern);
+        SearchBox {
+            tmp: pattern.clone(),
+            pattern: pattern,
+            visible: false,
         }
     }
-    pub fn set_title(&mut self, title: &str) {
-        self.title = String::from(title);
+    pub fn toggle_visible(&mut self) {
+        self.visible = !self.visible;
     }
-    pub fn set_text(&mut self, text: &str) {
-        self.text = String::from(text);
-    }
-    pub fn write(&mut self, c: char) {
-        self.text.push(c);
-    }
-    pub fn backspace(&mut self) {
-        self.text.pop();
+    pub fn hide(&mut self) {
+        self.visible = false;
     }
 
-    pub fn is_active(&self) -> bool {
-        self.active
-    }
-    pub fn deactivate(&mut self) {
-        self.active = false;
-    }
-}
-
-impl Component for Modal {
-    fn name(&self) -> &str {
-        "Modal"
-    }
-    fn id(&self) -> String {
-        self.text.clone()
-    }
-    fn render_in_parent(
+    pub fn render_in_parent(
         &mut self,
         parent: &mut Frame<CrosstermBackend<io::Stdout>>,
         chunk: Rect,
     ) -> Result<(), Error> {
-        let chunk = get_modal_rect(chunk);
         let modal = Block::default()
             .borders(Borders::ALL)
             .style(block_style())
-            .title(self.title.clone())
+            .title("Search using glob patterns (<Esc> / <Enter>)")
             .border_type(BorderType::Rounded);
 
         let text = vec![Spans::from(Span::styled(
-            self.text.clone(),
+            self.tmp.clone(),
             paragraph_style(),
         ))];
         let paragraph = Paragraph::new(text)
@@ -85,6 +60,26 @@ impl Component for Modal {
         Ok(())
     }
 
+    pub fn set_tmp(&mut self, tmp: &str) {
+        self.tmp = String::from(tmp);
+    }
+
+    pub fn write(&mut self, c: char) {
+        self.tmp.push(c);
+    }
+
+    pub fn backspace(&mut self) {
+        self.tmp.pop();
+    }
+}
+impl Component for SearchBox {
+    fn name(&self) -> &str {
+        "SearchBox"
+    }
+    fn id(&self) -> String {
+        self.tmp.clone()
+    }
+    #[allow(unused_variables)]
     fn process_keyboard(
         &mut self,
         event: KeyEvent,
@@ -92,17 +87,21 @@ impl Component for Modal {
         context: SharedContext,
         _router: SharedRouter,
     ) -> Result<LoopEvent, Error> {
+        let code = event.code;
         match event.code {
             KeyCode::Backspace => {
                 self.backspace();
                 Ok(Propagate)
             }
             KeyCode::Esc => {
-                self.deactivate();
+                self.hide();
                 return Ok(Propagate);
             }
             KeyCode::Enter => {
-                self.write('\n');
+                if !self.tmp.is_empty() {
+                    self.pattern = self.tmp.clone();
+                }
+                self.hide();
                 return Ok(Propagate);
             }
             KeyCode::Char(c) => {
@@ -114,11 +113,9 @@ impl Component for Modal {
     }
 }
 pub fn block_style() -> Style {
-    Style::default().bg(Color::DarkGray).fg(Color::White)
+    Style::default().bg(ui::color_default()).fg(Color::White)
 }
 
 pub fn paragraph_style() -> Style {
-    Style::default()
-        .fg(Color::White)
-        .add_modifier(Modifier::BOLD)
+    Style::default().fg(Color::White)
 }

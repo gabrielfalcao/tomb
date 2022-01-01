@@ -1,5 +1,6 @@
 pub mod components;
 pub mod config;
+pub mod form;
 pub mod geometry;
 pub mod logging;
 pub mod routes;

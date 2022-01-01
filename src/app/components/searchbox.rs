@@ -1,3 +1,4 @@
+#![allow(unused_variables)]
 use super::super::ui;
 use crate::ironpunk::*;
 use crossterm::event::{KeyCode, KeyEvent};
@@ -79,13 +80,13 @@ impl Component for SearchBox {
     fn id(&self) -> String {
         self.tmp.clone()
     }
-    #[allow(unused_variables)]
+
     fn process_keyboard(
         &mut self,
         event: KeyEvent,
         terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
         context: SharedContext,
-        _router: SharedRouter,
+        router: SharedRouter,
     ) -> Result<LoopEvent, Error> {
         let code = event.code;
         match event.code {

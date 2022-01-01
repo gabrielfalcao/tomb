@@ -1,3 +1,4 @@
+#![allow(unused_variables)]
 #![allow(unused_imports)]
 #![allow(dead_code)]
 use crate::ironpunk::*;
@@ -33,7 +34,6 @@ pub struct ConfirmationDialog<'a> {
 }
 
 impl<'a> ConfirmationDialog<'a> {
-    #[allow(dead_code)]
     pub fn new(question: Option<Vec<Spans<'a>>>) -> ConfirmationDialog<'a> {
         ConfirmationDialog {
             question: question,
@@ -140,7 +140,6 @@ impl<'a> Component for ConfirmationDialog<'a> {
         Ok(())
     }
 
-    #[allow(unused_variables)]
     fn process_keyboard(
         &mut self,
         event: KeyEvent,

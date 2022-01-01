@@ -26,6 +26,7 @@ pub use tui::{
 pub type Backend = CrosstermBackend<io::Stdout>;
 pub type SharedError = Box<dyn std::error::Error>;
 pub type SharedComponent = Rc<RefCell<dyn Component>>;
+pub type SharedFocusable = Rc<RefCell<dyn Focusable>>;
 pub type SharedRoute = Rc<RefCell<dyn Route>>;
 pub type SharedRouter = Router<SharedRoute>;
 
@@ -177,6 +178,16 @@ pub trait Component {
         rect.render_widget(not_implemented, get_modal_rect(chunk));
         Ok(())
     }
+}
+
+pub trait Focusable
+where
+    Self: Component,
+{
+    fn tab_index(&self) -> usize;
+    fn is_focused(&self) -> bool;
+    fn focus(&mut self);
+    fn blur(&mut self);
 }
 
 pub trait Route

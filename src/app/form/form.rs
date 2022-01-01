@@ -15,48 +15,40 @@ use tui::{
     Frame, Terminal,
 };
 
-#[derive(Debug, Clone)]
-pub struct Modal {
-    pub title: String,
-    pub text: String,
-    active: bool,
+#[derive(Clone)]
+pub struct Form {
+    id: String,
+    pub title: Option<String>,
+    fields: Vec<SharedFocusable>,
+    selected_index: Option<usize>,
 }
-/// Modal with editable content
-impl Modal {
-    pub fn new(title: &str, text: &str) -> Modal {
-        Modal {
-            title: String::from(title),
-            text: String::from(text),
-            active: true,
+/// Form with editable content
+impl Form {
+    pub fn new(id: &str, title: Option<String>, fields: Vec<SharedFocusable>) -> Form {
+        Form {
+            id: String::from(id),
+            title,
+            fields,
+            selected_index: None,
         }
     }
+    pub fn add_field(&mut self, field: SharedFocusable) {
+        self.fields.push(field);
+    }
     pub fn set_title(&mut self, title: &str) {
-        self.title = String::from(title);
+        self.title = Some(String::from(title));
     }
-    pub fn set_text(&mut self, text: &str) {
-        self.text = String::from(text);
-    }
-    pub fn write(&mut self, c: char) {
-        self.text.push(c);
-    }
-    pub fn backspace(&mut self) {
-        self.text.pop();
-    }
-
-    pub fn is_active(&self) -> bool {
-        self.active
-    }
-    pub fn deactivate(&mut self) {
-        self.active = false;
+    pub fn remove_title(&mut self) {
+        self.title = None;
     }
 }
 
-impl Component for Modal {
+impl Component for Form {
     fn name(&self) -> &str {
-        "Modal"
+        "Form"
     }
     fn id(&self) -> String {
-        self.text.clone()
+        self.id.clone()
     }
     fn render_in_parent(
         &mut self,
@@ -67,11 +59,13 @@ impl Component for Modal {
         let modal = Block::default()
             .borders(Borders::ALL)
             .style(block_style())
-            .title(self.title.clone())
             .border_type(BorderType::Rounded);
-
+        let modal = match &self.title {
+            Some(title) => modal.title(title.clone()),
+            None => modal,
+        };
         let text = vec![Spans::from(Span::styled(
-            self.text.clone(),
+            String::from("Form Placeholder"),
             paragraph_style(),
         ))];
         let paragraph = Paragraph::new(text)
@@ -93,21 +87,14 @@ impl Component for Modal {
         _router: SharedRouter,
     ) -> Result<LoopEvent, Error> {
         match event.code {
-            KeyCode::Backspace => {
-                self.backspace();
-                Ok(Propagate)
-            }
             KeyCode::Esc => {
-                self.deactivate();
                 return Ok(Propagate);
             }
             KeyCode::Enter => {
-                self.write('\n');
                 return Ok(Propagate);
             }
             KeyCode::Char(c) => {
-                self.write(c);
-                Ok(Refresh)
+                return Ok(Propagate);
             }
             _ => Ok(Propagate),
         }

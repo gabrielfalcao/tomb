@@ -6,3 +6,5 @@ pub use confirmation::*;
 pub use menu::*;
 pub use modal::*;
 pub use searchbox::*;
+pub mod secret_details;
+pub use secret_details::*;
