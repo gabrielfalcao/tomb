@@ -1,6 +1,6 @@
 [package]
 name = "tomb"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["Gabriel Falcão <gabrielfalcao@protonmail.com>"]
 
@@ -19,7 +19,6 @@ md5 = "*"
 clipboard = "0.5.0"
 #termion = { version = "1.5", optional = true }
 crossterm = { version = "0.22", features=["serde"]}
-
 mac-notification-sys = {version = "0.3", optional = true}
 dirs = "4.0.0"
 tui = {version = "0.16.0",features = ["crossterm", "serde"]}
