@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 #![allow(unused_variables)]
 #![allow(dead_code)]
+use super::super::super::ui::*;
 
 use crate::ironpunk::*;
 
@@ -10,7 +11,7 @@ use tui::{
     backend::CrosstermBackend,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
-    text::{Span, Spans},
+    text::{Span, Spans, Text},
     widgets::{Block, BorderType, Borders, Paragraph, Wrap},
     Frame, Terminal,
 };
@@ -26,13 +27,13 @@ pub struct TextField {
 }
 /// TextField with editable content
 impl TextField {
-    pub fn new(id: &str, title: &str, value: &str, read_only: bool) -> TextField {
+    pub fn new(id: &str, title: &str, value: String, read_only: bool) -> TextField {
         TextField {
             id: String::from(id),
             title: Some(String::from(title)),
-            value: String::from(value),
+            value: value.clone(),
             focused: false,
-            buf: String::new(),
+            buf: value.clone(),
             read_only: read_only,
         }
     }
@@ -42,9 +43,6 @@ impl TextField {
     pub fn remove_title(&mut self) {
         self.title = None;
     }
-    pub fn set_value(&mut self, value: &str) {
-        self.value = String::from(value);
-    }
     pub fn write(&mut self, c: char) {
         self.buf.push(c);
     }
@@ -52,6 +50,7 @@ impl TextField {
         self.buf.pop();
     }
 }
+
 impl Component for TextField {
     fn name(&self) -> &str {
         "TextField"
@@ -64,7 +63,6 @@ impl Component for TextField {
         parent: &mut Frame<CrosstermBackend<io::Stdout>>,
         chunk: Rect,
     ) -> Result<(), Error> {
-        let chunk = get_modal_rect(chunk);
         let modal = Block::default()
             .borders(Borders::ALL)
             .style(block_style())
@@ -73,10 +71,7 @@ impl Component for TextField {
             Some(title) => modal.title(title.clone()),
             None => modal,
         };
-        let text = vec![Spans::from(Span::styled(
-            self.value.clone(),
-            paragraph_style(),
-        ))];
+        let text = Text::from(self.buf.clone());
         let paragraph = Paragraph::new(text)
             .block(modal)
             .style(paragraph_style())
@@ -131,12 +126,14 @@ impl Focusable for TextField {
     }
 }
 
-pub fn block_style() -> Style {
-    Style::default().bg(Color::DarkGray).fg(Color::White)
-}
-
-pub fn paragraph_style() -> Style {
-    Style::default()
-        .fg(Color::White)
-        .add_modifier(Modifier::BOLD)
+impl Field for TextField {
+    fn set_value(&mut self, value: &str) {
+        self.value = String::from(value);
+    }
+    fn get_value(&mut self) -> String {
+        self.value.clone()
+    }
+    fn constraint(&self) -> Constraint {
+        Constraint::Length(3)
+    }
 }

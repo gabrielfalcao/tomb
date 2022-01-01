@@ -1,6 +1,6 @@
 use super::config::TombConfig;
 use regex::Regex;
-use tui::style::Color;
+use tui::style::{Color, Style};
 
 pub fn parse_rgb_hex(color: &str) -> Option<(u8, u8, u8)> {
     let re = Regex::new(r"[#]?([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})").unwrap();
@@ -45,7 +45,7 @@ pub fn color_default() -> Color {
         "red" => Color::Red,
         "yellow" => Color::Yellow,
         "gray" => Color::DarkGray,
-        color => rgb_to_color(color).unwrap_or(Color::White),
+        color => rgb_to_color(color).unwrap_or(color_text()),
     }
 }
 pub fn color_light() -> Color {
@@ -57,6 +57,27 @@ pub fn color_light() -> Color {
         "red" => Color::LightRed,
         "yellow" => Color::LightYellow,
         "gray" => Color::Gray,
-        color => rgb_to_color(color).unwrap_or(Color::DarkGray),
+        color => rgb_to_color(color).unwrap_or(color_blurred()),
     }
+}
+pub fn color_blurred() -> Color {
+    Color::DarkGray
+}
+
+pub fn color_text() -> Color {
+    Color::White
+}
+pub fn color_error_bg() -> Color {
+    Color::Rgb(0, 0, 0)
+}
+pub fn color_error_fg() -> Color {
+    Color::Rgb(155, 155, 155)
+}
+
+pub fn block_style() -> Style {
+    Style::default().fg(color_default())
+}
+
+pub fn paragraph_style() -> Style {
+    Style::default().fg(color_blurred())
 }

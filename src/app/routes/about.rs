@@ -88,7 +88,7 @@ impl Component for About<'_> {
             Spans::from(vec![Span::raw("powered by")]),
             Spans::from(vec![Span::styled(
                 "AES-256-CBC",
-                Style::default().fg(ui::color_default()),
+                Style::default().fg(ui::color_light()),
             )]),
             Spans::from(vec![Span::raw("encryption")]),
         ])

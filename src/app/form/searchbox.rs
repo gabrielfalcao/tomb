@@ -113,9 +113,11 @@ impl Component for SearchBox {
     }
 }
 pub fn block_style() -> Style {
-    Style::default().bg(ui::color_default()).fg(Color::White)
+    Style::default()
+        .bg(ui::color_default())
+        .fg(ui::color_text())
 }
 
 pub fn paragraph_style() -> Style {
-    Style::default().fg(Color::White)
+    Style::default().fg(ui::color_text())
 }

@@ -2,6 +2,7 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
+use crate::app::ui::*;
 use crate::ironpunk::*;
 
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
@@ -112,13 +113,4 @@ impl Component for Modal {
             _ => Ok(Propagate),
         }
     }
-}
-pub fn block_style() -> Style {
-    Style::default().bg(Color::DarkGray).fg(Color::White)
-}
-
-pub fn paragraph_style() -> Style {
-    Style::default()
-        .fg(Color::White)
-        .add_modifier(Modifier::BOLD)
 }

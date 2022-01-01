@@ -3,6 +3,7 @@
 #![allow(dead_code)]
 
 pub use super::super::components::{menu::Menu, modal::Modal, searchbox::SearchBox};
+pub use super::super::form::{Form, TextField};
 use super::super::geometry::*;
 use super::super::log_error;
 pub use super::super::state::*;
@@ -80,60 +81,59 @@ impl<'a> SecretDetails<'a> {
             Err(err) => Err(err),
         }
     }
-    fn create_widget(&mut self, secret: AES256Secret) -> Table<'a> {
-        Table::new(vec![Row::new(vec![
-            Cell::from(Span::raw(format!(
-                "{}",
-                secret
-                    .digest
-                    .iter()
-                    .map(|b| format!("{:02x}", *b))
-                    .collect::<Vec::<_>>()
-                    .join("")
-            ))),
-            Cell::from(Span::raw(secret.path.clone())),
-            Cell::from(Span::raw(match self.visible {
-                true => match self.get_plaintext(&secret.clone()) {
-                    Ok(plaintext) => plaintext,
-                    Err(err) => format!("{}", err),
-                },
+    fn create_form(&mut self, secret: AES256Secret) -> Form {
+        let digest = secret
+            .digest
+            .iter()
+            .map(|b| format!("{:02x}", *b))
+            .collect::<Vec<_>>()
+            .join("");
+
+        let mut form = Form::new(
+            "secret-details",
+            Some(String::from("Details Title")),
+            Vec::new(),
+        );
+        let field_path = TextField::new("secret-path-field", "path", secret.path.clone(), true);
+        let field_digest =
+            TextField::new("secret-digest-field", "digest", format!("{}", digest), true);
+        let field_value = TextField::new(
+            "secret-value-field",
+            "value",
+            match self.visible {
+                true => {
+                    let secret = secret.clone();
+                    match self.get_plaintext(&secret) {
+                        Ok(plaintext) => plaintext,
+                        Err(err) => format!("{}", err),
+                    }
+                }
                 false => secret.value,
-            })),
-            Cell::from(Span::raw(
-                chrono_humanize::HumanTime::from(secret.updated_at).to_string(),
-            )),
-        ])])
-        .header(Row::new(vec![
-            Cell::from(Span::styled(
-                "digest",
-                Style::default().add_modifier(Modifier::BOLD),
-            )),
-            Cell::from(Span::styled(
-                "name",
-                Style::default().add_modifier(Modifier::BOLD),
-            )),
-            Cell::from(Span::styled(
-                "value",
-                Style::default().add_modifier(Modifier::BOLD),
-            )),
-            Cell::from(Span::styled(
-                "updated at",
-                Style::default().add_modifier(Modifier::BOLD),
-            )),
-        ]))
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .style(Style::default().fg(ui::color_default()))
-                .title("Metadata")
-                .border_type(BorderType::Plain),
-        )
-        .widths(&[
-            Constraint::Percentage(20),
-            Constraint::Percentage(30),
-            Constraint::Percentage(30),
-            Constraint::Percentage(20),
-        ])
+            },
+            true,
+        );
+        let field_notes = TextField::new(
+            "secret-notes-field",
+            "notes",
+            match secret.notes {
+                Some(notes) => notes.clone(),
+                None => String::from("<none>"),
+            },
+            true,
+        );
+        let field_updated_at = TextField::new(
+            "secret-updated-at-field",
+            "updated-at",
+            chrono_humanize::HumanTime::from(secret.updated_at).to_string(),
+            true,
+        );
+
+        form.add_field(field_digest);
+        form.add_field(field_path);
+        form.add_field(field_value);
+        form.add_field(field_updated_at);
+        form.add_field(field_notes);
+        form
     }
 }
 
@@ -160,8 +160,8 @@ impl Component for SecretDetails<'_> {
         match &self.secret {
             Some(secret) => {
                 let secret = secret.clone();
-                let widget = self.create_widget(secret);
-                parent.render_widget(widget, chunk);
+                let mut form = self.create_form(secret);
+                form.render_in_parent(parent, chunk)?;
             }
             None => {
                 parent.render_widget(error_paragraph("", "No secret selected"), chunk);

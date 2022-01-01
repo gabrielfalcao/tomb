@@ -1,6 +1,7 @@
 #![allow(unused_variables)]
 #![allow(unused_imports)]
 #![allow(dead_code)]
+use crate::app::ui;
 use crate::ironpunk::*;
 
 use super::super::{AES256Secret, AES256Tomb};
@@ -98,17 +99,17 @@ impl<'a> Component for ConfirmationDialog<'a> {
             match self.selected {
                 Yes => Style::default()
                     .bg(Color::LightGreen)
-                    .fg(Color::White)
+                    .fg(ui::color_text())
                     .add_modifier(Modifier::UNDERLINED),
-                No => Style::default().bg(Color::Green).fg(Color::White),
+                No => Style::default().bg(Color::Green).fg(ui::color_text()),
             },
         ))])
         .block(
             Block::default()
                 .borders(Borders::ALL)
                 .style(match self.selected {
-                    Yes => Style::default().bg(Color::LightGreen).fg(Color::White),
-                    No => Style::default().bg(Color::Green).fg(Color::White),
+                    Yes => Style::default().bg(Color::LightGreen).fg(ui::color_text()),
+                    No => Style::default().bg(Color::Green).fg(ui::color_text()),
                 }),
         )
         .alignment(Alignment::Center);
@@ -117,17 +118,17 @@ impl<'a> Component for ConfirmationDialog<'a> {
             match self.selected {
                 No => Style::default()
                     .bg(Color::LightRed)
-                    .fg(Color::White)
+                    .fg(ui::color_text())
                     .add_modifier(Modifier::UNDERLINED),
-                Yes => Style::default().bg(Color::Red).fg(Color::White),
+                Yes => Style::default().bg(Color::Red).fg(ui::color_text()),
             },
         ))])
         .block(
             Block::default()
                 .borders(Borders::ALL)
                 .style(match self.selected {
-                    No => Style::default().bg(Color::LightRed).fg(Color::White),
-                    Yes => Style::default().bg(Color::Red).fg(Color::White),
+                    No => Style::default().bg(Color::LightRed).fg(ui::color_text()),
+                    Yes => Style::default().bg(Color::Red).fg(ui::color_text()),
                 }),
         )
         .alignment(Alignment::Center);
@@ -195,5 +196,5 @@ pub fn highlight_style() -> Style {
 }
 
 pub fn block_style() -> Style {
-    Style::default().bg(Color::White).fg(Color::Black)
+    Style::default().bg(ui::color_text()).fg(Color::Black)
 }

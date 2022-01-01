@@ -27,6 +27,7 @@ pub type Backend = CrosstermBackend<io::Stdout>;
 pub type SharedError = Box<dyn std::error::Error>;
 pub type SharedComponent = Rc<RefCell<dyn Component>>;
 pub type SharedFocusable = Rc<RefCell<dyn Focusable>>;
+pub type SharedField = Rc<RefCell<dyn Field>>;
 pub type SharedRoute = Rc<RefCell<dyn Route>>;
 pub type SharedRouter = Router<SharedRoute>;
 
@@ -188,6 +189,15 @@ where
     fn is_focused(&self) -> bool;
     fn focus(&mut self);
     fn blur(&mut self);
+}
+
+pub trait Field
+where
+    Self: Focusable,
+{
+    fn get_value(&mut self) -> String;
+    fn constraint(&self) -> Constraint;
+    fn set_value(&mut self, value: &str);
 }
 
 pub trait Route

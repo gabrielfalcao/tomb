@@ -153,13 +153,12 @@ impl<'a> Application<'a> {
             },
         };
 
-        let list = List::new(items)
-            .block(secrets)
-            .highlight_style(Style::default().bg(ui::color_default()).fg(Color::White));
+        let list = List::new(items).block(secrets).highlight_style(
+            Style::default()
+                .bg(ui::color_default())
+                .fg(ui::color_text()),
+        );
 
-        let secret = selected_secret.clone();
-        self.details.set_visible(self.visible);
-        self.details.set_secret(secret);
         Ok(list)
     }
     pub fn search_visible(&self) -> bool {
@@ -371,9 +370,30 @@ impl Route for Application<'_> {
             match self.render_secrets() {
                 Ok(list) => {
                     rect.render_stateful_widget(list, sidebar_rect, &mut self.items.state);
-                    self.details
-                        .render_in_parent(rect, details_rect)
-                        .expect("failed to render details for secret");
+                    match self.selected_secret() {
+                        Ok(secret) => {
+                            self.details.set_visible(self.visible);
+                            self.details.set_secret(secret);
+
+                            match self.details.render_in_parent(rect, details_rect) {
+                                Ok(_) => {
+                                    // TODO
+                                }
+                                Err(error) => {
+                                    let error = error_text(
+                                        "Application Error",
+                                        "Cannot render secret metadata:",
+                                        &error.message,
+                                    );
+                                    rect.render_widget(error, details_rect);
+                                }
+                            }
+                        }
+                        Err(error) => {
+                            let error = error_text("", "Welcome to Tomb", &error.message);
+                            rect.render_widget(error, details_rect);
+                        }
+                    }
                 }
                 Err(error) => {
                     let error =
@@ -424,7 +444,11 @@ pub fn error_text<'a>(label: &'a str, title: &'a str, error: &'a str) -> Paragra
     .block(
         Block::default()
             .borders(Borders::ALL)
-            .style(Style::default().bg(ui::color_default()).fg(Color::White))
+            .style(
+                Style::default()
+                    .bg(ui::color_error_bg())
+                    .fg(ui::color_error_fg()),
+            )
             .title(label)
             .border_type(BorderType::Plain),
     )
