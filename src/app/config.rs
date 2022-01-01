@@ -86,8 +86,8 @@ impl TombConfig {
     }
     pub fn builtin() -> TombConfig {
         TombConfig::new(
-            "D740B3",
-            "FF6FFC",
+            "995500",
+            "FFCC00",
             &default_key_filename(),
             &default_tomb_filename(),
             &default_log_filename(),
