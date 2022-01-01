@@ -9,7 +9,6 @@ use crate::{
 use serde::{Deserialize, Serialize};
 use shellexpand;
 use std::fmt;
-use tui::style::Color;
 
 pub const TOMB_CONFIG: &'static str = "~/.tomb.config.yaml";
 pub const TOMB_LOG: &'static str = "~/.tomb.log";
@@ -95,28 +94,6 @@ impl TombConfig {
     }
     pub fn set_ui_color(&mut self, color: &str) {
         self.ui_color = color.to_string();
-    }
-    pub fn ui_color_default(&self) -> Color {
-        match self.ui_color.to_lowercase().as_str() {
-            "blue" => Color::Blue,
-            "cyan" => Color::Cyan,
-            "green" => Color::Green,
-            "magenta" => Color::Magenta,
-            "red" => Color::Red,
-            "yellow" => Color::Yellow,
-            _unknown => Color::Magenta,
-        }
-    }
-    pub fn ui_color_light(&self) -> Color {
-        match self.ui_color.to_lowercase().as_str() {
-            "blue" => Color::LightBlue,
-            "cyan" => Color::LightCyan,
-            "green" => Color::LightGreen,
-            "magenta" => Color::LightMagenta,
-            "red" => Color::LightRed,
-            "yellow" => Color::LightYellow,
-            _unknown => Color::LightMagenta,
-        }
     }
     pub fn save(&mut self) -> Result<(), Error> {
         let filename = default_tomb_config_filename();
