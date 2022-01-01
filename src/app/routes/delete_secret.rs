@@ -1,17 +1,19 @@
 use super::super::components::confirmation::{
     highlight_style, paragraph_style, ConfirmationDialog, ConfirmationOption,
 };
-
 use crate::aes256cbc::Config as AesConfig;
 use crate::aes256cbc::Key;
+
 // use crate::config::YamlFile;
+use crate::app::TombConfig;
 use crate::ironpunk::*;
-use crate::tomb::{AES256Secret, AES256Tomb, DEFAULT_TOMB_PATH};
+use crate::tomb::{default_tomb_filename, AES256Secret, AES256Tomb};
 
 use super::super::logging::log_error;
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use std::{io, marker::PhantomData};
 use tui::{backend::CrosstermBackend, Terminal};
+
 #[allow(dead_code)]
 #[derive(Clone)]
 pub struct DeleteSecret<'a> {
@@ -19,21 +21,28 @@ pub struct DeleteSecret<'a> {
     secret_path: Option<String>,
     tomb: AES256Tomb,
     aes_config: AesConfig,
+    tomb_config: TombConfig,
     phantom: PhantomData<&'a Option<()>>,
     dialog: ConfirmationDialog<'a>,
     tomb_filepath: String,
 }
 
 impl<'a> DeleteSecret<'a> {
-    pub fn new(key: Key, tomb: AES256Tomb, aes_config: AesConfig) -> DeleteSecret<'a> {
+    pub fn new(
+        key: Key,
+        tomb: AES256Tomb,
+        tomb_config: TombConfig,
+        aes_config: AesConfig,
+    ) -> DeleteSecret<'a> {
         DeleteSecret {
             key,
             tomb,
             aes_config,
+            tomb_config,
             secret_path: None,
             phantom: PhantomData,
             dialog: ConfirmationDialog::new(None),
-            tomb_filepath: String::from(DEFAULT_TOMB_PATH),
+            tomb_filepath: default_tomb_filename(),
         }
     }
     pub fn get_secret(

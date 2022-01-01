@@ -3,8 +3,9 @@ TOMB_RELEASE_BIN		:=target/release/tomb
 TOMB_BIN			:=$(TOMB_DEBUG_BIN)
 PASSWORD			:="I <3 Nickelback"
 PLAINTEXT			:="Hello World"
-TOMB_KEY			:= .test-tomb-key.yaml
-TOMB_FILE			:= .test-tomb-file.yaml
+export TOMB_CONFIG		:= .test-tomb-config.yaml
+export TOMB_KEY			:= .test-tomb-key.yaml
+export TOMB_FILE		:= .test-tomb-file.yaml
 
 all: fix release
 
@@ -59,36 +60,36 @@ coverage: cls
 tomb: tomb-init tomb-save tomb-list tomb-get tomb-copy
 
 tomb-init: build cls
-	$(TOMB_BIN) init -K 1111 -S 2222 -I 3333 -k $(TOMB_KEY) -t $(TOMB_FILE) --password $(PASSWORD)
+	$(TOMB_BIN) init -K 1111 -S 2222 -I 3333 --password $(PASSWORD)
 
 tomb-save: build cls
-	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) 'work/gmail' 'Sup@DupAs3cr3T'
-	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) 'work/vpn' 'Sup@1wadsaa'
-	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) 'work/employee_id' '42069'
-	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) '/gmail/my@gmail.com' 's(22;@dup3cr3t'
-	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) '/spotify' 'COCCOp@d99'
-	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) '/netflix' '42069'
-	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) '/github' 'f$$bd^*G0912'
-	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) '/twitter' '**7w337%@$$'
+	$(TOMB_BIN) save 'work/gmail' 'Sup@DupAs3cr3T'
+	$(TOMB_BIN) save 'work/vpn' 'Sup@1wadsaa'
+	$(TOMB_BIN) save 'work/employee_id' '42069'
+	$(TOMB_BIN) save '/gmail/my@gmail.com' 's(22;@dup3cr3t'
+	$(TOMB_BIN) save '/spotify' 'COCCOp@d99'
+	$(TOMB_BIN) save '/netflix' '42069'
+	$(TOMB_BIN) save '/github' 'f$$bd^*G0912'
+	$(TOMB_BIN) save '/twitter' '**7w337%@$$'
 
 tomb-list: build cls
-	$(TOMB_BIN) list -k $(TOMB_KEY) -t $(TOMB_FILE)
+	$(TOMB_BIN) list
 
 tomb-get: build cls
-	$(TOMB_BIN) get -k $(TOMB_KEY) -t $(TOMB_FILE) /github
+	$(TOMB_BIN) get /github
 
 tomb-copy: build cls
-	$(TOMB_BIN) copy -k $(TOMB_KEY) -t $(TOMB_FILE) /spotify
+	$(TOMB_BIN) copy /spotify
 
 tomb-delete: build cls
-	$(TOMB_BIN) save -k $(TOMB_KEY) -t $(TOMB_FILE) temporary-secret "some value"
-	$(TOMB_BIN) delete -k $(TOMB_KEY) -t $(TOMB_FILE) temporary-secret
+	$(TOMB_BIN) save temporary-secret "some value"
+	$(TOMB_BIN) delete temporary-secret
 
-tomb-ui: tomb-init tomb-save
-	$(TOMB_BIN) ui -T 314 -k $(TOMB_KEY) -t $(TOMB_FILE)
+tomb-ui: clean tomb-init tomb-save
+	$(TOMB_BIN) ui -T 314
 
 ui:
-	cargo run --bin tomb ui -T 400 -k $(TOMB_KEY) -t $(TOMB_FILE)
+	cargo run --bin tomb ui -T 400
 
 obfuskat3: cls 0b4sk8d.yaml
 

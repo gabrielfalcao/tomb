@@ -2,13 +2,14 @@ pub use super::super::components::{menu::Menu, modal::Modal, searchbox::SearchBo
 use super::super::geometry::*;
 use super::super::log_error;
 pub use super::super::state::*;
+use super::super::ui;
 use crate::ioutils::log_to_file;
 use chrono::prelude::*;
 
 use crate::ironpunk::*;
 
 extern crate clipboard;
-use super::super::{AES256Secret, AES256Tomb};
+use super::super::{AES256Secret, AES256Tomb, TombConfig};
 use crate::aes256cbc::{Config as AesConfig, Key};
 
 use clipboard::{ClipboardContext, ClipboardProvider};
@@ -35,6 +36,7 @@ pub struct Application<'a> {
     key: Key,
     tomb: AES256Tomb,
     aes_config: AesConfig,
+    tomb_config: TombConfig,
     phantom: PhantomData<&'a List<'a>>,
     started_at: DateTime<Utc>,
     pub label: String,
@@ -49,12 +51,18 @@ pub struct Application<'a> {
 }
 
 impl<'a> Application<'a> {
-    pub fn new(key: Key, tomb: AES256Tomb, aes_config: AesConfig) -> Application<'a> {
+    pub fn new(
+        key: Key,
+        tomb: AES256Tomb,
+        tomb_config: TombConfig,
+        aes_config: AesConfig,
+    ) -> Application<'a> {
         log_error(format!("tomb opened"));
         Application {
             key,
             tomb,
             aes_config,
+            tomb_config,
             menu: Menu::default("Secrets"),
             searchbox: SearchBox::new("*"),
             started_at: Utc::now(),
@@ -139,7 +147,7 @@ impl<'a> Application<'a> {
 
         let list = List::new(items)
             .block(secrets)
-            .highlight_style(Style::default().bg(Color::Cyan).fg(Color::White));
+            .highlight_style(Style::default().bg(ui::color_default()).fg(Color::White));
 
         let secret = selected_secret.clone();
         let secret_detail = Table::new(vec![Row::new(vec![
@@ -185,7 +193,7 @@ impl<'a> Application<'a> {
         .block(
             Block::default()
                 .borders(Borders::ALL)
-                .style(Style::default().fg(Color::Cyan))
+                .style(Style::default().fg(ui::color_default()))
                 .title("Metadata")
                 .border_type(BorderType::Plain),
         )
@@ -435,7 +443,7 @@ impl Route for Application<'_> {
 
 pub fn status_paragraph<'a>(title: &'a str, content: &'a str) -> Paragraph<'a> {
     Paragraph::new(content)
-        .style(Style::default().fg(Color::LightCyan))
+        .style(Style::default().fg(ui::color_light()))
         .alignment(Alignment::Center)
         .block(
             Block::default()
@@ -459,7 +467,7 @@ pub fn error_text<'a>(label: &'a str, title: &'a str, error: &'a str) -> Paragra
     .block(
         Block::default()
             .borders(Borders::ALL)
-            .style(Style::default().bg(Color::Cyan).fg(Color::White))
+            .style(Style::default().bg(ui::color_default()).fg(Color::White))
             .title(label)
             .border_type(BorderType::Plain),
     )

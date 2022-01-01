@@ -1,5 +1,7 @@
+use super::super::ui;
 use crate::ironpunk::*;
 use crossterm::event::{KeyCode, KeyEvent};
+
 use std::io;
 use tui::{
     backend::CrosstermBackend,
@@ -111,7 +113,7 @@ impl Component for SearchBox {
     }
 }
 pub fn block_style() -> Style {
-    Style::default().bg(Color::Cyan).fg(Color::White)
+    Style::default().bg(ui::color_default()).fg(Color::White)
 }
 
 pub fn paragraph_style() -> Style {

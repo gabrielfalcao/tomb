@@ -8,14 +8,12 @@ use std::path::Path;
 //use console::style;
 use std::panic;
 use tomb::{
-    aes256cbc::{Config as AesConfig, Key, DEFAULT_KEY_PATH},
-    app,
+    aes256cbc::{default_key_filename, Config as AesConfig, Key},
+    app::{self, TombConfig},
     config::YamlFile,
     logger,
-    tomb::AES256Tomb,
+    tomb::{default_tomb_filename, AES256Tomb},
 };
-
-pub const DEFAULT_TOMB_FILE: &'static str = "~/.tomb.yaml";
 
 pub fn confirm_password() -> Option<String> {
     let password = rpassword::prompt_password_stderr("Password: ").unwrap();
@@ -81,6 +79,8 @@ fn load_tomb(matches: &ArgMatches) -> AES256Tomb {
 }
 
 fn init_command(matches: &ArgMatches) {
+    let mut tomb_config = TombConfig::load();
+    tomb_config.save().unwrap();
     let ask_password = matches.is_present("ask_password");
     let key_cycles = matches
         .value_of("key_cycles")
@@ -258,6 +258,7 @@ fn ui_command(matches: &ArgMatches) {
         }
     };
 
+    let tomb_config = TombConfig::load();
     let aes_config = AesConfig::default().unwrap_or(AesConfig::builtin(None));
     let tick_interval = matches.value_of("tick_interval").unwrap_or("314");
     let tick_interval = match tick_interval.parse::<u64>() {
@@ -270,7 +271,7 @@ fn ui_command(matches: &ArgMatches) {
             std::process::exit(1);
         }
     };
-    match app::start(tomb, key, aes_config, tick_interval) {
+    match app::start(tomb, key, tomb_config, aes_config, tick_interval) {
         Ok(()) => {}
         Err(error) => {
             eprintln!("{}", error);
@@ -284,6 +285,8 @@ fn main() {
         eprintln!("{}", e);
     }));
 
+    let tomb_filename = default_tomb_filename();
+    let key_filename = default_key_filename();
     let app = App::new("⚰Tomb")
         .setting(AppSettings::SubcommandRequiredElseHelp)
         .about("Password Manager")
@@ -295,7 +298,7 @@ fn main() {
                         .long("key-filename")
                         .help("the path to the aes256cbc key to encrypt the tomb secrets")
                         .short("k")
-                        .default_value("~/.tomb.key")
+                        .default_value(&key_filename)
                         .required(true)
                         .takes_value(true),
                 )
@@ -304,7 +307,7 @@ fn main() {
                         .long("tomb")
                         .short("t")
                         .value_name("FILENAME")
-                        .default_value(DEFAULT_TOMB_FILE)
+                        .default_value(&tomb_filename)
                         .help("the path to the tomb file containing the encrypted secrets")
                         .takes_value(true),
                 )
@@ -330,7 +333,7 @@ fn main() {
                     Arg::with_name("key_filename")
                         .long("key-filename")
                         .short("k")
-                        .default_value(DEFAULT_KEY_PATH)
+                        .default_value(&key_filename)
                         .required(true)
                         .takes_value(true),
                 )
@@ -374,7 +377,7 @@ fn main() {
                         .long("tomb")
                         .short("t")
                         .value_name("FILENAME")
-                        .default_value(DEFAULT_TOMB_FILE)
+                        .default_value(&tomb_filename)
                         .help("the path to the tomb file containing the encrypted secrets")
                         .takes_value(true),
                 ),
@@ -387,7 +390,7 @@ fn main() {
                         .long("key-filename")
                         .help("the path to the aes256cbc key to encrypt the tomb secrets")
                         .short("k")
-                        .default_value("~/.tomb.key")
+                        .default_value(&key_filename)
                         .required(true)
                         .takes_value(true),
                 )
@@ -405,7 +408,7 @@ fn main() {
                         .long("tomb")
                         .short("t")
                         .value_name("FILENAME")
-                        .default_value(DEFAULT_TOMB_FILE)
+                        .default_value(&tomb_filename)
                         .help("the path to the tomb file containing the encrypted secrets")
                         .takes_value(true),
                 ),
@@ -418,7 +421,7 @@ fn main() {
                         .long("key-filename")
                         .help("the path to the aes256cbc key to encrypt the tomb secrets")
                         .short("k")
-                        .default_value("~/.tomb.key")
+                        .default_value(&key_filename)
                         .required(true)
                         .takes_value(true),
                 )
@@ -427,7 +430,7 @@ fn main() {
                         .long("tomb")
                         .short("t")
                         .value_name("FILENAME")
-                        .default_value(DEFAULT_TOMB_FILE)
+                        .default_value(&tomb_filename)
                         .help("the path to the tomb file containing the encrypted secrets")
                         .takes_value(true),
                 )
@@ -447,7 +450,7 @@ fn main() {
                         .long("key-filename")
                         .help("the path to the aes256cbc key to encrypt the tomb secrets")
                         .short("k")
-                        .default_value("~/.tomb.key")
+                        .default_value(&key_filename)
                         .required(true)
                         .takes_value(true),
                 )
@@ -465,7 +468,7 @@ fn main() {
                         .long("tomb")
                         .short("t")
                         .value_name("FILENAME")
-                        .default_value(DEFAULT_TOMB_FILE)
+                        .default_value(&tomb_filename)
                         .help("the path to the tomb file containing the encrypted secrets")
                         .takes_value(true),
                 )
@@ -485,7 +488,7 @@ fn main() {
                         .long("key-filename")
                         .help("the path to the aes256cbc key to encrypt the tomb secrets")
                         .short("k")
-                        .default_value("~/.tomb.key")
+                        .default_value(&key_filename)
                         .required(false)
                         .takes_value(true),
                 )
@@ -494,7 +497,7 @@ fn main() {
                         .long("tomb")
                         .short("t")
                         .value_name("FILENAME")
-                        .default_value(DEFAULT_TOMB_FILE)
+                        .default_value(&tomb_filename)
                         .help("the path to the tomb file containing the encrypted secrets")
                         .takes_value(true),
                 )
@@ -514,7 +517,7 @@ fn main() {
                         .long("key-filename")
                         .help("the path to the aes256cbc key to encrypt the tomb secrets")
                         .short("k")
-                        .default_value("~/.tomb.key")
+                        .default_value(&key_filename)
                         .required(false)
                         .takes_value(true),
                 )
@@ -523,7 +526,7 @@ fn main() {
                         .long("tomb")
                         .short("t")
                         .value_name("FILENAME")
-                        .default_value(DEFAULT_TOMB_FILE)
+                        .default_value(&tomb_filename)
                         .help("the path to the tomb file containing the encrypted secrets")
                         .takes_value(true),
                 )

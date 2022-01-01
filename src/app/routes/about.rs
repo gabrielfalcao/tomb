@@ -1,8 +1,9 @@
 use super::super::components::menu::Menu;
 use super::super::geometry::*;
+use super::super::ui;
 use crate::aes256cbc::Config as AesConfig;
+use crate::app::TombConfig;
 use crate::core::version;
-
 use crate::ironpunk::*;
 
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
@@ -10,7 +11,7 @@ use std::{io, marker::PhantomData};
 use tui::{
     backend::CrosstermBackend,
     layout::Alignment,
-    style::{Color, Style},
+    style::Style,
     widgets::{Block, BorderType, Borders, Paragraph},
     Terminal,
 };
@@ -19,13 +20,15 @@ use tui::{
 #[derive(Clone)]
 pub struct About<'a> {
     aes_config: AesConfig,
+    tomb_config: TombConfig,
     phantom: PhantomData<&'a Option<()>>,
 }
 
 impl<'a> About<'a> {
-    pub fn new(aes_config: AesConfig) -> About<'a> {
+    pub fn new(tomb_config: TombConfig, aes_config: AesConfig) -> About<'a> {
         About {
             aes_config,
+            tomb_config,
             phantom: PhantomData,
         }
     }
@@ -54,7 +57,7 @@ impl Component for About<'_> {
         let version = format!("Version {}", version());
         let block = Block::default()
             .borders(Borders::ALL)
-            .style(Style::default().fg(Color::Cyan))
+            .style(Style::default().fg(ui::color_default()))
             .title("<press (Esc) to dismiss>")
             .border_type(BorderType::Plain);
 
@@ -74,22 +77,22 @@ impl Component for About<'_> {
             Spans::from(vec![Span::raw("️⚰Tomb - Password Manager")]),
             Spans::from(vec![Span::raw(&version)]),
         ])
-        .style(Style::default().fg(Color::Cyan))
+        .style(Style::default().fg(ui::color_default()))
         .alignment(Alignment::Center)
         .block(
             Block::default()
                 .borders(Borders::NONE)
-                .style(Style::default().fg(Color::LightCyan)),
+                .style(Style::default().fg(ui::color_light())),
         );
         let middle = Paragraph::new(vec![
             Spans::from(vec![Span::raw("powered by")]),
             Spans::from(vec![Span::styled(
                 "AES-256-CBC",
-                Style::default().fg(Color::Cyan),
+                Style::default().fg(ui::color_default()),
             )]),
             Spans::from(vec![Span::raw("encryption")]),
         ])
-        .style(Style::default().fg(Color::LightCyan))
+        .style(Style::default().fg(ui::color_light()))
         .alignment(Alignment::Center)
         .block(Block::default().borders(Borders::NONE));
         let bottom = Paragraph::new(vec![
@@ -97,7 +100,7 @@ impl Component for About<'_> {
             Spans::from(vec![Span::raw("twitter: @gabrielfalcao")]),
             // Spans::from(vec![Span::raw("https://github.com/gabrielfalcao/tomb")]),
         ])
-        .style(Style::default().fg(Color::Cyan))
+        .style(Style::default().fg(ui::color_default()))
         .alignment(Alignment::Center)
         .block(Block::default().borders(Borders::NONE));
 

@@ -13,13 +13,15 @@ use fnmatch_regex::glob_to_regex;
 use logging::*;
 use md5;
 use serde::{Deserialize, Serialize};
+use shellexpand;
 use std::collections::BTreeMap;
 use std::{borrow::Borrow, fmt};
 pub const DEFAULT_TOMB_PATH: &'static str = "~/.tomb.yaml";
 
 pub fn default_tomb_filename() -> String {
     match std::env::var("TOMB_FILE") {
-        Ok(filename) => filename,
+        Ok(filename) => String::from(shellexpand::tilde(filename.as_str())),
+
         Err(_err) => String::from(DEFAULT_TOMB_PATH),
     }
 }

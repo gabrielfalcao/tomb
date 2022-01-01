@@ -49,6 +49,7 @@ use crypto::{aes, blockmodes, buffer, pbkdf2};
 use rand::RngCore;
 use serde::{Deserialize, Serialize};
 use shellexpand;
+
 use std::borrow::Borrow;
 use std::io::Read;
 use std::{fmt, fs::File};
@@ -61,7 +62,7 @@ pub const DEFAULT_KEY_PATH: &'static str = "~/.tomb.key";
 
 pub fn default_key_filename() -> String {
     match std::env::var("TOMB_KEY") {
-        Ok(filename) => filename,
+        Ok(filename) => String::from(shellexpand::tilde(&filename)),
         Err(_err) => String::from(DEFAULT_KEY_PATH),
     }
 }

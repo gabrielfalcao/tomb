@@ -6,12 +6,13 @@ use crate::{
     config::{YamlFile, YamlFileError},
     logger,
 };
-
 use serde::{Deserialize, Serialize};
 use shellexpand;
-
 use std::{borrow::Borrow, fmt};
-pub const DEFAULT_TOMB_CONFIG_PATH: &'static str = "~/.tombconfig";
+use tui::style::Color;
+
+pub const DEFAULT_TOMB_CONFIG_PATH: &'static str = "~/.tomb.config.yaml";
+
 pub fn default_tomb_config_filename() -> String {
     match std::env::var("TOMB_CONFIG") {
         Ok(filename) => String::from(shellexpand::tilde(&filename)),
@@ -59,19 +60,44 @@ impl YamlFile<Error> for TombConfig {
 
 impl TombConfig {
     /// Creates a new tomb config in memory
-    pub fn new(ui_color: &str, _key_filename: &str, tomb_filename: &str) -> TombConfig {
+    pub fn new(ui_color: &str, key_filename: &str, tomb_filename: &str) -> TombConfig {
         TombConfig {
             version: Some(version()),
             ui_color: ui_color.to_string(),
-            key_filename: tomb_filename.to_string(),
+            key_filename: key_filename.to_string(),
             tomb_filename: tomb_filename.to_string(),
         }
     }
-    pub fn default() -> TombConfig {
+    pub fn builtin() -> TombConfig {
         TombConfig::new("cyan", &default_key_filename(), &default_tomb_filename())
+    }
+    pub fn load() -> TombConfig {
+        TombConfig::default().unwrap_or(TombConfig::builtin())
     }
     pub fn set_ui_color(&mut self, color: &str) {
         self.ui_color = color.to_string();
+    }
+    pub fn ui_color_default(&self) -> Color {
+        match self.ui_color.to_lowercase().as_str() {
+            "blue" => Color::Blue,
+            "cyan" => Color::Cyan,
+            "green" => Color::Green,
+            "magenta" => Color::Magenta,
+            "red" => Color::Red,
+            "yellow" => Color::Yellow,
+            _unknown => Color::Magenta,
+        }
+    }
+    pub fn ui_color_light(&self) -> Color {
+        match self.ui_color.to_lowercase().as_str() {
+            "blue" => Color::LightBlue,
+            "cyan" => Color::LightCyan,
+            "green" => Color::LightGreen,
+            "magenta" => Color::LightMagenta,
+            "red" => Color::LightRed,
+            "yellow" => Color::LightYellow,
+            _unknown => Color::LightMagenta,
+        }
     }
     pub fn save(&mut self) -> Result<(), Error> {
         let filename = default_tomb_config_filename();

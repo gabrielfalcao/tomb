@@ -1,4 +1,5 @@
 //use super::super::logging::log_error;
+use super::super::ui;
 use crate::ironpunk::*;
 use crossterm::event::{KeyCode, KeyEvent};
 use std::{collections::BTreeMap, io};
@@ -10,6 +11,7 @@ use tui::{
     widgets::{Block, Borders, Tabs},
     Frame, Terminal,
 };
+
 #[derive(PartialEq, Clone, Debug)]
 pub struct MenuItem {
     pub label: String,
@@ -165,7 +167,7 @@ impl Menu {
                     Span::styled(
                         first,
                         Style::default()
-                            .fg(Color::Cyan)
+                            .fg(ui::color_default())
                             .add_modifier(Modifier::UNDERLINED),
                     ),
                     Span::styled(rest, Style::default().fg(Color::DarkGray)),
@@ -176,7 +178,7 @@ impl Menu {
             .select(self.selected_index())
             .block(Block::default().title("Menu").borders(Borders::ALL))
             .style(Style::default().fg(Color::DarkGray))
-            .highlight_style(Style::default().fg(Color::LightCyan))
+            .highlight_style(Style::default().fg(ui::color_light()))
             .divider(Span::raw("|"));
 
         parent.render_widget(tabs, chunk);
