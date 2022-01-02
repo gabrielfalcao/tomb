@@ -4,5 +4,7 @@ pub mod help;
 pub use help::*;
 pub mod delete_secret;
 pub use delete_secret::*;
+pub mod edit_secret;
+pub use edit_secret::*;
 pub mod application;
 pub use application::*;

@@ -51,6 +51,14 @@ pub fn start(
             aes_config.clone(),
         ))),
     );
+    router.add(
+        "/edit/:key",
+        Rc::new(RefCell::new(EditSecret::new(
+            key.clone(),
+            tomb.clone(),
+            tomb_config.clone(),
+        ))),
+    );
     router.add("/:filter", app.clone());
     router.add("/", app);
     ironpunk::start(router, tick_interval)
