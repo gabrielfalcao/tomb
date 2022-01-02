@@ -5,7 +5,6 @@ use super::super::ui::*;
 use crate::app::log_error;
 
 use crate::ironpunk::*;
-use std::collections::BTreeMap;
 
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use std::io;
@@ -22,12 +21,12 @@ use tui::{
 pub struct Form {
     pub id: String,
     pub title: Option<String>,
-    pub fields: BTreeMap<String, SharedField>,
+    pub fields: Vec<SharedField>,
     pub selected_index: Option<usize>,
 }
 /// Form with editable content
 impl Form {
-    pub fn new(id: &str, title: Option<String>, fields: BTreeMap<String, SharedField>) -> Form {
+    pub fn new(id: &str, title: Option<String>, fields: Vec<SharedField>) -> Form {
         Form {
             id: String::from(id),
             title,
@@ -39,8 +38,7 @@ impl Form {
     where
         T: Field,
     {
-        self.fields
-            .insert(String::from(field.id()), Rc::new(RefCell::new(field)));
+        self.fields.push(Rc::new(RefCell::new(field)));
     }
     pub fn set_title(&mut self, title: &str) {
         self.title = Some(String::from(title));
@@ -77,7 +75,7 @@ impl Form {
         };
     }
     pub fn focused_field(&mut self) -> Option<(String, SharedField)> {
-        for (_, field) in self.fields.iter_mut() {
+        for field in self.fields.iter_mut() {
             if field.borrow().is_focused() {
                 let title = match field.borrow_mut().get_title() {
                     Some(title) => title.clone(),
@@ -90,14 +88,14 @@ impl Form {
     }
 
     pub fn blur(&mut self) {
-        for (id, field) in self.fields.iter_mut() {
+        for field in self.fields.iter_mut() {
             field.borrow_mut().blur();
         }
         self.selected_index = None;
     }
     pub fn field_constraints(&self) -> Vec<Constraint> {
         let mut result = Vec::new();
-        for (id, field) in self.fields.iter() {
+        for field in self.fields.iter() {
             result.push(field.borrow().constraint());
         }
         result
@@ -118,7 +116,7 @@ impl Component for Form {
     ) -> Result<(), Error> {
         let chunks = vertical_stack(chunk, self.field_constraints());
 
-        for (i, (id, field)) in self.fields.iter_mut().enumerate() {
+        for (i, field) in self.fields.iter_mut().enumerate() {
             let chunk = chunks[i];
             match self.selected_index.clone() {
                 Some(index) => {

@@ -9,7 +9,6 @@ pub use super::super::state::*;
 use super::super::ui;
 use crate::app::log_error;
 use chrono::prelude::*;
-use std::collections::BTreeMap;
 
 use crate::ironpunk::*;
 #[cfg(feature = "osx")]
@@ -53,7 +52,7 @@ impl<'a> SecretDetails<'a> {
         let form = Form::new(
             "secret-details",
             Some(String::from("Details Title")),
-            BTreeMap::new(),
+            Vec::new(),
         );
         SecretDetails {
             key,
@@ -72,11 +71,13 @@ impl<'a> SecretDetails<'a> {
             None => {}
         };
     }
-    pub fn get_field(&self, id: &str) -> Option<SharedField> {
-        match self.form.fields.clone().get(id) {
-            Some(field) => Some(field.clone()),
-            None => None,
+    pub fn get_field(&mut self, id: &str) -> Option<SharedField> {
+        for field in &mut self.form.fields.iter_mut() {
+            if field.borrow().get_id().eq(id) {
+                return Some(field.clone());
+            }
         }
+        None
     }
     pub fn selected_field(&mut self) -> Option<(String, SharedField)> {
         self.form.focused_field()
