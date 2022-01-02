@@ -12,6 +12,7 @@ use tomb::{
     aes256cbc::{default_key_filename, Config as AesConfig, Key},
     app::{self, TombConfig},
     config::YamlFile,
+    core::version,
     logger,
     tomb::{default_tomb_filename, AES256Tomb},
 };
@@ -292,9 +293,11 @@ fn main() {
 
     let tomb_filename = default_tomb_filename();
     let key_filename = default_key_filename();
+    let version = version();
     let app = App::new("⚰Tomb")
         .setting(AppSettings::SubcommandRequiredElseHelp)
         .about("Password Manager")
+        .version(version.as_str())
         .subcommand(
             SubCommand::with_name("save")
                 .about("store a secret in the tomb")
