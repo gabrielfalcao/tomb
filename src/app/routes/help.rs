@@ -91,12 +91,16 @@ Keyboard Shortcuts:
     ) -> Result<LoopEvent, Error> {
         match event.code {
             KeyCode::Esc => {
-                context.borrow_mut().goback();
+                context.borrow_mut().goto("/");
                 Ok(Refresh)
             }
             KeyCode::Char('q') => Ok(Quit),
             KeyCode::Left => {
                 context.borrow_mut().goback();
+                Ok(Refresh)
+            }
+            KeyCode::Right => {
+                context.borrow_mut().goto("/about");
                 Ok(Refresh)
             }
             _ => {

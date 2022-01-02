@@ -11,7 +11,6 @@ use tui::layout::{Constraint, Direction, Layout};
 pub fn vertical_stack(size: Rect) -> (Rect, Rect, Rect) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
-        .margin(2)
         .constraints(
             [
                 Constraint::Length(3),

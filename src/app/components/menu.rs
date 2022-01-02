@@ -51,6 +51,7 @@ impl Menu {
     pub fn default(selected: &str) -> Menu {
         let mut menu = Menu::empty();
         menu.add_item("Secrets", KeyCode::Char('s'), "/").unwrap();
+        menu.add_item("Help", KeyCode::Char('h'), "/help").unwrap();
         menu.add_item("About", KeyCode::Char('a'), "/about")
             .unwrap();
         menu.select(selected).unwrap_or(());

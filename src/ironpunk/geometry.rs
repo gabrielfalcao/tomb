@@ -14,7 +14,6 @@ pub use tui::{
 pub fn get_modal_rect(parent: Rect) -> Rect {
     let vertical_chunks = Layout::default()
         .direction(Direction::Vertical)
-        .margin(2)
         .constraints(
             [
                 Constraint::Percentage(20),

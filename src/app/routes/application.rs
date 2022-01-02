@@ -107,6 +107,12 @@ impl<'a> Application<'a> {
         match self.tomb.clone().list(pattern) {
             Ok(items) => {
                 self.items.update(items);
+                match self.items.current() {
+                    Some(_) => {}
+                    None => {
+                        self.items.next();
+                    }
+                }
             }
             Err(err) => self.error = Some(format!("Search error: {}", err)),
         };
@@ -327,8 +333,15 @@ impl Component for Application<'_> {
                     .process_keyboard(event, terminal, context.clone(), router.clone())?;
                 match code {
                     KeyCode::Tab => {
-                        self.focused = FocusedComponent::Details;
-                        self.details.tab(event.modifiers == KeyModifiers::SHIFT);
+                        match self.items.current() {
+                            Some(_) => {
+                                self.focused = FocusedComponent::Details;
+                                self.details.tab(event.modifiers == KeyModifiers::SHIFT);
+                            }
+                            None => {
+                                log_error(format!("no secret selected"));
+                            }
+                        }
                         Ok(Propagate)
                     }
                     KeyCode::Char('d') => match self.items.current() {
@@ -517,7 +530,6 @@ pub fn error_text<'a>(label: &'a str, title: &'a str, error: &'a str) -> Paragra
 pub fn overlay_position(size: Rect) -> Rect {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
-        .margin(2)
         .constraints([Constraint::Max(3), Constraint::Percentage(80)].as_ref())
         .split(size);
     chunks[0]
