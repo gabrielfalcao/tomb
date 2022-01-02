@@ -77,7 +77,7 @@ impl Component for About<'_> {
             Spans::from(vec![Span::raw("️⚰Tomb - Password Manager")]),
             Spans::from(vec![Span::raw(&version)]),
         ])
-        .style(ui::default_style().fg(ui::color_default()))
+        .style(ui::default_style().fg(ui::color_light()))
         .alignment(Alignment::Center)
         .block(
             Block::default()

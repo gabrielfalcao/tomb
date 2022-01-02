@@ -39,7 +39,6 @@ pub struct SecretDetails<'a> {
     tomb_config: TombConfig,
     visible: bool,
     form: Form,
-    secret_field: SecretField,
     phantom: PhantomData<&'a List<'a>>,
 }
 
@@ -51,14 +50,6 @@ impl<'a> SecretDetails<'a> {
         tomb_config: TombConfig,
         visible: bool,
     ) -> SecretDetails<'a> {
-        let secret_field = SecretField::new(
-            "secret-value-field",
-            "value",
-            true,
-            secret.clone(),
-            tomb.clone(),
-            key.clone(),
-        );
         let form = Form::new(
             "secret-details",
             Some(String::from("Details Title")),
@@ -71,13 +62,15 @@ impl<'a> SecretDetails<'a> {
             tomb_config,
             visible,
             form,
-            secret_field,
             phantom: PhantomData,
         }
     }
     pub fn set_visible(&mut self, visible: bool) {
         self.visible = visible;
-        self.secret_field.set_visible(visible);
+        match self.secret_field() {
+            Some(field) => field.borrow_mut().set_visible(visible),
+            None => {}
+        };
     }
     pub fn get_field(&self, id: &str) -> Option<SharedField> {
         match self.form.fields.clone().get(id) {
@@ -85,9 +78,19 @@ impl<'a> SecretDetails<'a> {
             None => None,
         }
     }
+    pub fn selected_field(&mut self) -> Option<(String, SharedField)> {
+        self.form.focused_field()
+    }
+    pub fn secret_field(&mut self) -> Option<SharedField> {
+        match &mut self.get_field("secret-value-field") {
+            Some(field) => Some(field.clone()),
+            None => None,
+        }
+    }
+
     pub fn set_secret(&mut self, secret: AES256Secret) {
         self.secret = Some(secret.clone());
-        match &mut self.get_field("secret-value-field") {
+        match &mut self.secret_field() {
             Some(field) => match self.get_plaintext(&secret) {
                 Ok(plaintext) => {
                     field.borrow_mut().set_value(plaintext.as_str());
@@ -139,11 +142,24 @@ impl<'a> SecretDetails<'a> {
             .collect::<Vec<_>>()
             .join("");
 
-        let field_name = TextField::new("secret-name-field", "name", secret.name(), true);
-        let field_group = TextField::new("secret-group-field", "group", secret.group(), true);
+        let field_name = TextField::new("secret-name-field", "name", secret.name(), true, true);
+        let field_group = TextField::new("secret-group-field", "group", secret.group(), true, true);
+        let field_secret = SecretField::new(
+            "secret-value-field",
+            "value",
+            true,
+            self.secret.clone(),
+            self.tomb.clone(),
+            self.key.clone(),
+        );
 
-        let field_digest =
-            TextField::new("secret-digest-field", "digest", format!("{}", digest), true);
+        let field_digest = TextField::new(
+            "secret-digest-field",
+            "digest",
+            format!("{}", digest),
+            true,
+            true,
+        );
         let field_notes = TextField::new(
             "secret-notes-field",
             "notes",
@@ -152,17 +168,19 @@ impl<'a> SecretDetails<'a> {
                 None => String::from("<none>"),
             },
             true,
+            true,
         );
         let field_updated_at = TextField::new(
             "secret-updated-at-field",
             "updated-at",
             chrono_humanize::HumanTime::from(secret.updated_at).to_string(),
             true,
+            true,
         );
 
         self.form.add_field(field_name);
         self.form.add_field(field_group);
-        self.form.add_field(self.secret_field.clone());
+        self.form.add_field(field_secret);
         self.form.add_field(field_updated_at);
         self.form.add_field(field_digest);
         self.form.add_field(field_notes);

@@ -39,7 +39,7 @@ impl SecretField {
         key: Key,
     ) -> SecretField {
         SecretField {
-            field: TextField::new(id, title, String::new(), read_only),
+            field: TextField::new(id, title, String::new(), read_only, false),
             secret,
             tomb,
             key,
@@ -48,9 +48,6 @@ impl SecretField {
     }
     pub fn set_secret(&mut self, secret: Option<AES256Secret>) {
         self.secret = secret;
-    }
-    pub fn set_visible(&mut self, visible: bool) {
-        self.visible = visible;
     }
     pub fn set_title(&mut self, title: &str) {
         self.field.set_title(title)
@@ -153,18 +150,16 @@ impl Field for SecretField {
         let path = secret.path.clone();
         let plaintext = String::from(value);
 
-        if self.visible {
-            self.field.set_value(plaintext.as_str());
-        } else {
-            self.field.set_value(secret.value.as_str());
-        }
-
         match self
             .tomb
             .add_secret(path.as_str(), plaintext.clone(), self.key.clone())
         {
             Ok(_) => {
-                log_error(format!("SecretField.set_value({})", value));
+                if self.visible {
+                    self.field.set_value(plaintext.as_str());
+                } else {
+                    self.field.set_value(secret.value.as_str());
+                }
             }
             Err(error) => {
                 log_error(format!("error setting secret to field {}: {}", path, error));
@@ -193,5 +188,18 @@ impl Field for SecretField {
     }
     fn constraint(&self) -> Constraint {
         self.field.constraint()
+    }
+    fn set_visible(&mut self, visible: bool) {
+        self.visible = visible;
+        self.field.set_visible(visible)
+    }
+    fn get_visible(&mut self) -> bool {
+        self.visible
+    }
+    fn get_title(&mut self) -> Option<String> {
+        self.field.get_title()
+    }
+    fn set_title(&mut self, title: &str) {
+        self.field.set_title(title)
     }
 }

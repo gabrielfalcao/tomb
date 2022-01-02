@@ -22,21 +22,20 @@ pub struct TextField {
     pub value: String,
     pub id: String,
     pub focused: bool,
+    pub visible: bool,
     pub read_only: bool,
 }
 
 impl TextField {
-    pub fn new(id: &str, title: &str, value: String, read_only: bool) -> TextField {
+    pub fn new(id: &str, title: &str, value: String, read_only: bool, visible: bool) -> TextField {
         TextField {
             id: String::from(id),
             title: Some(String::from(title)),
             value: value.clone(),
             focused: false,
-            read_only: read_only,
+            read_only,
+            visible,
         }
-    }
-    pub fn set_title(&mut self, title: &str) {
-        self.title = Some(String::from(title));
     }
     pub fn remove_title(&mut self) {
         self.title = None;
@@ -132,11 +131,24 @@ impl Field for TextField {
     fn get_id(&self) -> String {
         self.id.clone()
     }
+    fn get_title(&mut self) -> Option<String> {
+        self.title.clone()
+    }
+    fn set_title(&mut self, title: &str) {
+        self.title = Some(String::from(title));
+    }
+
     fn set_value(&mut self, value: &str) {
         self.value = String::from(value);
     }
     fn get_value(&mut self) -> String {
         self.value.clone()
+    }
+    fn set_visible(&mut self, visible: bool) {
+        self.visible = visible;
+    }
+    fn get_visible(&mut self) -> bool {
+        self.visible
     }
     fn constraint(&self) -> Constraint {
         Constraint::Length(3)

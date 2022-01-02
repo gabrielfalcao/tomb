@@ -261,9 +261,50 @@ impl Component for Application<'_> {
                         self.details.blur();
                         self.focused = FocusedComponent::Sidebar;
                     }
+                    KeyCode::Enter => {
+                        match &mut self.details.selected_field() {
+                            Some((title, field)) => {
+                                let value = field.borrow_mut().get_value();
+                                let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
+                                ctx.set_contents(value).unwrap();
+                                log_error(format!("copied {} to clipboard", title));
+                                let text = format!("{} copied to clipboard", title);
+                                self.set_text(&text);
+                                #[cfg(feature = "osx")]
+                                send_notification(
+                                    "Tomb",
+                                    &Some("copied to clipboard"),
+                                    "",
+                                    &Some("Glass"),
+                                )
+                                .unwrap();
+                            }
+                            None => {
+                                // TODO
+                            }
+                        }
+                    }
                     KeyCode::Char('q') => {
                         log_error(format!("tomb closed"));
                         return Ok(Quit);
+                    }
+                    KeyCode::Char('t') => {
+                        match self.selected_secret_string() {
+                            Ok(plaintext) => {
+                                self.set_pinned(true);
+                                self.toggle_visible();
+                                self.set_text(match self.visible {
+                                    true => "Secrets visible. (Press 't' again to toggle)",
+                                    false => "Secrets hidden. (Press 't' again to toggle)",
+                                });
+                            }
+                            Err(error) => {
+                                log_error(format!("cannot toggle visibility: {}", error));
+                            }
+                        };
+                        log_error(format!("toggle visible: {:?}", self.visible));
+
+                        return Ok(Refresh);
                     }
                     _ => {}
                 };
@@ -289,10 +330,6 @@ impl Component for Application<'_> {
                         self.focused = FocusedComponent::Details;
                         self.details.tab(event.modifiers == KeyModifiers::SHIFT);
                         Ok(Propagate)
-                    }
-                    KeyCode::Char('q') => {
-                        log_error(format!("tomb closed"));
-                        Ok(Quit)
                     }
                     KeyCode::Char('d') => match self.items.current() {
                         Some(secret) => {
@@ -328,25 +365,7 @@ impl Component for Application<'_> {
                                 log_error(format!("cannot reveal secret: {}", error));
                             }
                         };
-                        Ok(Refresh)
-                    }
-                    KeyCode::Char('t') => {
-                        match self.selected_secret_string() {
-                            Ok(plaintext) => {
-                                self.set_pinned(true);
-                                self.toggle_visible();
-                                self.set_text(match self.visible {
-                                    true => "Secrets visible. (Press 't' again to toggle)",
-                                    false => "Secrets hidden. (Press 't' again to toggle)",
-                                });
-                            }
-                            Err(error) => {
-                                log_error(format!("cannot toggle visibility: {}", error));
-                            }
-                        };
-                        log_error(format!("toggle visible: {:?}", self.visible));
-
-                        Ok(Refresh)
+                        return Ok(Refresh);
                     }
                     KeyCode::Up => {
                         self.items.previous();

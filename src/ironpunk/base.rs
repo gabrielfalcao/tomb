@@ -196,9 +196,13 @@ where
     Self: Focusable,
 {
     fn get_id(&self) -> String;
-    fn get_value(&mut self) -> String;
     fn constraint(&self) -> Constraint;
+    fn get_title(&mut self) -> Option<String>;
+    fn set_title(&mut self, title: &str);
+    fn get_value(&mut self) -> String;
     fn set_value(&mut self, value: &str);
+    fn get_visible(&mut self) -> bool;
+    fn set_visible(&mut self, visible: bool);
 }
 
 pub trait Route

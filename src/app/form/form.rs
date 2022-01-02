@@ -77,6 +77,19 @@ impl Form {
             }
         };
     }
+    pub fn focused_field(&mut self) -> Option<(String, SharedField)> {
+        for (_, field) in self.fields.iter_mut() {
+            if field.borrow().is_focused() {
+                let title = match field.borrow_mut().get_title() {
+                    Some(title) => title.clone(),
+                    None => String::from("field"),
+                };
+                return Some((title, field.clone()));
+            }
+        }
+        None
+    }
+
     pub fn blur(&mut self) {
         for (id, field) in self.fields.iter_mut() {
             field.borrow_mut().blur();
