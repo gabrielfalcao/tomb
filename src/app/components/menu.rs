@@ -1,5 +1,4 @@
 #![allow(unused_variables)]
-#![allow(unused_imports)]
 
 use super::super::ui;
 use crate::ironpunk::*;
@@ -8,7 +7,7 @@ use std::{collections::BTreeMap, io};
 use tui::{
     backend::CrosstermBackend,
     layout::Rect,
-    style::{Color, Modifier, Style},
+    style::Modifier,
     text::{Span, Spans},
     widgets::{Block, Borders, Tabs},
     Frame, Terminal,

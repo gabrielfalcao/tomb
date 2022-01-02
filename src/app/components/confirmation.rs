@@ -1,14 +1,9 @@
 #![allow(unused_variables)]
-#![allow(unused_imports)]
 #![allow(dead_code)]
 use crate::app::ui;
 use crate::ironpunk::*;
 
-use super::super::{AES256Secret, AES256Tomb};
-
-use crate::config::YamlFile;
-
-use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use crossterm::event::{KeyCode, KeyEvent};
 use std::io;
 
 use tui::{
@@ -16,7 +11,7 @@ use tui::{
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Span, Spans},
-    widgets::{Block, BorderType, Borders, Paragraph, Sparkline, Wrap},
+    widgets::{Block, BorderType, Borders, Paragraph, Wrap},
     Frame, Terminal,
 };
 

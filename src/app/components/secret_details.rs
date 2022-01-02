@@ -1,33 +1,25 @@
-#![allow(unused_imports)]
 #![allow(unused_variables)]
 #![allow(dead_code)]
 
 pub use super::super::components::{menu::Menu, modal::Modal, searchbox::SearchBox};
 pub use super::super::form::{Form, SecretField, TextField};
-use super::super::geometry::*;
+
 pub use super::super::state::*;
 use super::super::ui;
 use crate::app::log_error;
-use chrono::prelude::*;
 
 use crate::ironpunk::*;
-#[cfg(feature = "osx")]
-use mac_notification_sys::*;
 
 extern crate clipboard;
 use super::super::{AES256Secret, AES256Tomb, TombConfig};
-use crate::aes256cbc::{Config as AesConfig, Key};
+use crate::aes256cbc::Key;
 
-use clipboard::{ClipboardContext, ClipboardProvider};
-use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use crossterm::event::{KeyCode, KeyEvent};
 
 use std::{io, marker::PhantomData};
 use tui::{
     backend::CrosstermBackend,
-    layout::Constraint,
-    style::{Color, Modifier, Style},
-    text::{Span, Spans},
-    widgets::{Block, BorderType, Borders, Cell, List, ListItem, Row, Table, Wrap},
+    widgets::{Block, BorderType, Borders, List},
     Terminal,
 };
 

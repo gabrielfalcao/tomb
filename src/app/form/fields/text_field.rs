@@ -1,4 +1,3 @@
-#![allow(unused_imports)]
 #![allow(unused_variables)]
 #![allow(dead_code)]
 use crate::app::log_error;
@@ -6,13 +5,12 @@ use crate::app::ui::*;
 
 use crate::ironpunk::*;
 
-use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use crossterm::event::{KeyCode, KeyEvent};
 use std::io;
 use tui::{
     backend::CrosstermBackend,
-    layout::{Alignment, Constraint, Direction, Layout, Rect},
-    style::{Color, Modifier, Style},
-    text::{Span, Spans, Text},
+    layout::{Alignment, Constraint, Rect},
+    text::Text,
     widgets::{Block, BorderType, Borders, Paragraph, Wrap},
     Frame, Terminal,
 };

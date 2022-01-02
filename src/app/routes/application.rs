@@ -1,4 +1,3 @@
-#![allow(unused_imports)]
 #![allow(unused_variables)]
 #![allow(dead_code)]
 
@@ -27,9 +26,8 @@ use std::{io, marker::PhantomData};
 use tui::{
     backend::CrosstermBackend,
     layout::Constraint,
-    style::{Color, Modifier, Style},
     text::{Span, Spans},
-    widgets::{Block, BorderType, Borders, Cell, List, ListItem, Row, Table, Wrap},
+    widgets::{Block, BorderType, Borders, List, ListItem, Wrap},
     Terminal,
 };
 

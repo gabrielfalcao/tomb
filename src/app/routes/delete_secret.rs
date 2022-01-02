@@ -1,5 +1,5 @@
 use super::super::components::confirmation::{
-    highlight_style, paragraph_style, ConfirmationDialog, ConfirmationOption,
+    paragraph_style, ConfirmationDialog, ConfirmationOption,
 };
 use crate::aes256cbc::Config as AesConfig;
 use crate::aes256cbc::Key;

@@ -1,4 +1,3 @@
-#![allow(unused_imports)]
 #![allow(unused_variables)]
 
 use super::super::ui;
@@ -9,8 +8,8 @@ use std::io;
 use tui::{
     backend::CrosstermBackend,
     layout::{Alignment, Rect},
-    style::{Color, Style},
-    text::{Span, Spans, Text},
+    style::Style,
+    text::Text,
     widgets::{Block, BorderType, Borders, Paragraph, Wrap},
     Frame, Terminal,
 };

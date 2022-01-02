@@ -1,19 +1,15 @@
 #![allow(unused_variables)]
-#![allow(unused_imports)]
 #![allow(dead_code)]
-use super::super::ui::*;
+
 use crate::app::log_error;
 
 use crate::ironpunk::*;
 
-use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use crossterm::event::{KeyCode, KeyEvent};
 use std::io;
 use tui::{
     backend::CrosstermBackend,
-    layout::{Alignment, Constraint, Direction, Layout, Rect},
-    style::{Color, Modifier, Style},
-    text::{Span, Spans},
-    widgets::{Block, BorderType, Borders, Paragraph, Wrap},
+    layout::{Constraint, Direction, Layout, Rect},
     Frame, Terminal,
 };
 
