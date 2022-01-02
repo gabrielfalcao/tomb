@@ -82,7 +82,7 @@ impl<'a> SecretDetails<'a> {
         self.form.focused_field()
     }
     pub fn secret_field(&mut self) -> Option<SharedField> {
-        match &mut self.get_field("secret-value-field") {
+        match &mut self.get_field("secret") {
             Some(field) => Some(field.clone()),
             None => None,
         }
@@ -135,33 +135,20 @@ impl<'a> SecretDetails<'a> {
             // form already populated
             return;
         }
-        let digest = secret
-            .digest
-            .iter()
-            .map(|b| format!("{:02x}", *b))
-            .collect::<Vec<_>>()
-            .join("");
 
-        let field_name = TextField::new("secret-name-field", "name", secret.name(), true, true);
-        let field_group = TextField::new("secret-group-field", "group", secret.group(), true, true);
+        let field_name = TextField::new("name", "name", secret.name(), true, true);
+        let field_group = TextField::new("group", "group", secret.group(), true, true);
         let field_secret = SecretField::new(
-            "secret-value-field",
+            "secret",
             "value",
             true,
             self.secret.clone(),
             self.tomb.clone(),
             self.key.clone(),
         );
-
-        let field_digest = TextField::new(
-            "secret-digest-field",
-            "digest",
-            format!("{}", digest),
-            true,
-            true,
-        );
+        let field_digest = TextField::new("digest", "digest", secret.hexdigest(), true, true);
         let field_notes = TextField::new(
-            "secret-notes-field",
+            "notes",
             "notes",
             match secret.notes {
                 Some(notes) => notes.clone(),
@@ -171,7 +158,7 @@ impl<'a> SecretDetails<'a> {
             true,
         );
         let field_updated_at = TextField::new(
-            "secret-updated-at-field",
+            "updated-at",
             "updated-at",
             chrono_humanize::HumanTime::from(secret.updated_at).to_string(),
             true,

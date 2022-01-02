@@ -53,7 +53,7 @@ impl Menu {
         menu.add_item("Secrets", KeyCode::Char('s'), "/").unwrap();
         menu.add_item("About", KeyCode::Char('a'), "/about")
             .unwrap();
-        menu.select(selected).unwrap();
+        menu.select(selected).unwrap_or(());
         menu
     }
     pub fn index_of(&self, item: &str) -> Result<usize, Error> {

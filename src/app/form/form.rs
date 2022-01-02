@@ -55,7 +55,6 @@ impl Form {
         }
         match self.selected_index.clone() {
             Some(index) => {
-                log_error(format!("selected form field: {:?}", index));
                 let new_index = if shift {
                     if index == 0 {
                         0

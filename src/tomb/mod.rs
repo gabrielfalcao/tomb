@@ -91,6 +91,15 @@ impl AES256Secret {
         let parts = self.path.split('/').collect::<Vec<&str>>();
         parts[parts.len() - 1].to_string()
     }
+    pub fn hexdigest(&self) -> String {
+        let digest = self
+            .digest
+            .iter()
+            .map(|b| format!("{:02x}", *b))
+            .collect::<Vec<_>>()
+            .join("");
+        format!("{}", digest)
+    }
     pub fn group(&self) -> String {
         let parts = self.path.split('/').collect::<Vec<&str>>();
         if parts.len() > 1 {

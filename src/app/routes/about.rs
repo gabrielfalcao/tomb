@@ -19,15 +19,13 @@ use tui::{
 #[allow(dead_code)]
 #[derive(Clone)]
 pub struct About<'a> {
-    aes_config: AesConfig,
     tomb_config: TombConfig,
     phantom: PhantomData<&'a Option<()>>,
 }
 
 impl<'a> About<'a> {
-    pub fn new(tomb_config: TombConfig, aes_config: AesConfig) -> About<'a> {
+    pub fn new(tomb_config: TombConfig) -> About<'a> {
         About {
-            aes_config,
             tomb_config,
             phantom: PhantomData,
         }

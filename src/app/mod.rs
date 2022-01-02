@@ -36,10 +36,11 @@ pub fn start(
 
     router.add(
         "/about",
-        Rc::new(RefCell::new(About::new(
-            tomb_config.clone(),
-            aes_config.clone(),
-        ))),
+        Rc::new(RefCell::new(About::new(tomb_config.clone()))),
+    );
+    router.add(
+        "/help",
+        Rc::new(RefCell::new(Help::new(tomb_config.clone()))),
     );
     router.add(
         "/delete/:key",

@@ -33,8 +33,7 @@ use tui::{
     Terminal,
 };
 
-const DEFAULT_STATUS: &'static str =
-    "'f' to filter / 't' toggle visibility / 'r' reveal / 'c' copy to clipboard";
+const DEFAULT_STATUS: &'static str = "press 'f' to filter / '?' for more help";
 
 #[derive(Eq, PartialEq, Clone)]
 pub enum FocusedComponent {
@@ -81,8 +80,8 @@ impl<'a> Application<'a> {
             menu: Menu::default("Secrets"),
             searchbox: SearchBox::new("*"),
             started_at: Utc::now(),
-            text: String::from("Up/Down browse secrets / 'f' search secrets"),
-            label: String::from("Keyboard Shortcuts"),
+            text: String::from("Up/Down browse secrets / '?' show help"),
+            label: String::from(""),
             visible: false,
             focused: FocusedComponent::Sidebar,
             pin_visible: false,
@@ -208,7 +207,7 @@ impl<'a> Application<'a> {
         }
         match self.selected_secret() {
             Ok(_) => {
-                let label = format!("Keyboard Shortcuts");
+                let label = format!("");
                 self.set_label(label.as_str());
                 self.set_text(DEFAULT_STATUS);
             }
@@ -343,6 +342,10 @@ impl Component for Application<'_> {
                     },
                     KeyCode::Char('a') => {
                         context.borrow_mut().goto("/about");
+                        Ok(Refresh)
+                    }
+                    KeyCode::Char('h') | KeyCode::Char('?') => {
+                        context.borrow_mut().goto("/help");
                         Ok(Refresh)
                     }
                     KeyCode::Char('s') => {

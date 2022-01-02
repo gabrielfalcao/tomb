@@ -1,7 +1,8 @@
 #![allow(unused_imports)]
 #![allow(unused_variables)]
 #![allow(dead_code)]
-use super::super::super::ui::*;
+use crate::app::log_error;
+use crate::app::ui::*;
 
 use crate::ironpunk::*;
 
@@ -121,6 +122,7 @@ impl Focusable for TextField {
     }
     fn focus(&mut self) {
         self.focused = true;
+        log_error(format!("selected field: {:?}", self.get_id()));
     }
     fn blur(&mut self) {
         self.focused = false;
