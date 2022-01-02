@@ -212,7 +212,9 @@ impl<'a> Application<'a> {
             self.set_visible(false);
         }
         match self.selected_secret() {
-            Ok(_) => {
+            Ok(secret) => {
+                self.details.set_visible(self.visible);
+                self.details.set_secret(secret);
                 let label = format!("");
                 self.set_label(label.as_str());
                 self.set_text(DEFAULT_STATUS);
@@ -224,14 +226,6 @@ impl<'a> Application<'a> {
             }
         }
         self.log_visibility();
-
-        // match self.selected_secret() {
-        //     Ok(secret) => {
-        //         self.details.set_visible(self.visible);
-        //         self.details.set_secret(secret);
-        //     }
-        //     Err(_) => {}
-        // }
     }
 }
 

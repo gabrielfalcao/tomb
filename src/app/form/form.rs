@@ -34,6 +34,9 @@ impl Form {
             selected_index: None,
         }
     }
+    pub fn purge_fields(&mut self) {
+        self.fields = Vec::new();
+    }
     pub fn add_field<T: 'static>(&mut self, field: T)
     where
         T: Field,

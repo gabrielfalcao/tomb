@@ -132,10 +132,7 @@ impl<'a> SecretDetails<'a> {
         }
     }
     fn populate_form(&mut self, secret: AES256Secret) {
-        if self.form.fields.len() > 0 {
-            // form already populated
-            return;
-        }
+        self.form.purge_fields();
 
         let field_name = TextField::new("name", "name", secret.name(), true, true);
         let field_group = TextField::new("group", "group", secret.group(), true, true);
@@ -143,6 +140,7 @@ impl<'a> SecretDetails<'a> {
             "secret",
             "value",
             true,
+            self.visible,
             self.secret.clone(),
             self.tomb.clone(),
             self.key.clone(),

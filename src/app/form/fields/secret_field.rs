@@ -34,16 +34,17 @@ impl SecretField {
         id: &str,
         title: &str,
         read_only: bool,
+        visible: bool,
         secret: Option<AES256Secret>,
         tomb: AES256Tomb,
         key: Key,
     ) -> SecretField {
         SecretField {
-            field: TextField::new(id, title, String::new(), read_only, false),
+            field: TextField::new(id, title, String::new(), read_only, visible),
             secret,
             tomb,
             key,
-            visible: false,
+            visible,
         }
     }
     pub fn set_secret(&mut self, secret: Option<AES256Secret>) {

@@ -5,6 +5,7 @@ use crate::aes256cbc::Config as AesConfig;
 use crate::aes256cbc::Key;
 
 // use crate::config::YamlFile;
+use crate::app::ui::*;
 use crate::app::TombConfig;
 use crate::ironpunk::*;
 use crate::tomb::{default_tomb_filename, AES256Secret, AES256Tomb};
@@ -176,7 +177,10 @@ impl Route for DeleteSecret<'_> {
                         "Are you sure you want to delete the secret",
                         paragraph_style(),
                     )]),
-                    Spans::from(vec![Span::styled(secret.path.clone(), highlight_style())]),
+                    Spans::from(vec![Span::styled(
+                        secret.path.clone(),
+                        paragraph_style().fg(color_blurred()),
+                    )]),
                     Spans::from(vec![Span::styled("?", paragraph_style())]),
                 ]))?;
             }

@@ -22,7 +22,7 @@ cls:
 	-@reset || tput reset
 
 release: check fix
-	@cargo build --release
+	@cargo build --release --features osx
 	cp target/release/tomb ~/usr/bin/
 
 debug: check fix build
@@ -106,12 +106,6 @@ ipleak: build cls
 
 load: clean build
 	./aestest.sh
-
-$(AES256_RELEASE_BIN):
-	@cargo build --release
-
-$(AES256_DEBUG_BIN):
-	@cargo build
 
 app: clean tomb-ui
 

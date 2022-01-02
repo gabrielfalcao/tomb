@@ -99,23 +99,17 @@ impl<'a> Component for ConfirmationDialog<'a> {
             match self.selected {
                 Yes => ui::default_style()
                     .bg(Color::LightGreen)
-                    .fg(ui::color_default_fg())
+                    .fg(Color::White)
                     .add_modifier(Modifier::UNDERLINED),
-                No => ui::default_style()
-                    .bg(Color::Green)
-                    .fg(ui::color_default_fg()),
+                No => ui::default_style().bg(Color::Green).fg(Color::White),
             },
         ))])
         .block(
             Block::default()
                 .borders(Borders::ALL)
                 .style(match self.selected {
-                    Yes => ui::default_style()
-                        .bg(Color::LightGreen)
-                        .fg(ui::color_default_fg()),
-                    No => ui::default_style()
-                        .bg(Color::Green)
-                        .fg(ui::color_default_fg()),
+                    Yes => ui::default_style().bg(Color::LightGreen).fg(Color::White),
+                    No => ui::default_style().bg(Color::Green).fg(Color::White),
                 }),
         )
         .alignment(Alignment::Center);
@@ -124,23 +118,17 @@ impl<'a> Component for ConfirmationDialog<'a> {
             match self.selected {
                 No => ui::default_style()
                     .bg(Color::LightRed)
-                    .fg(ui::color_default_fg())
+                    .fg(Color::White)
                     .add_modifier(Modifier::UNDERLINED),
-                Yes => ui::default_style()
-                    .bg(Color::Red)
-                    .fg(ui::color_default_fg()),
+                Yes => ui::default_style().bg(Color::Red).fg(Color::White),
             },
         ))])
         .block(
             Block::default()
                 .borders(Borders::ALL)
                 .style(match self.selected {
-                    No => ui::default_style()
-                        .bg(Color::LightRed)
-                        .fg(ui::color_default_fg()),
-                    Yes => ui::default_style()
-                        .bg(Color::Red)
-                        .fg(ui::color_default_fg()),
+                    No => ui::default_style().bg(Color::LightRed).fg(Color::White),
+                    Yes => ui::default_style().bg(Color::Red).fg(Color::White),
                 }),
         )
         .alignment(Alignment::Center);
@@ -208,7 +196,5 @@ pub fn highlight_style() -> Style {
 }
 
 pub fn block_style() -> Style {
-    ui::default_style()
-        .bg(ui::color_default_fg())
-        .fg(Color::Black)
+    ui::default_style().bg(Color::White).fg(Color::Black)
 }
