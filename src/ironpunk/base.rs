@@ -195,6 +195,7 @@ pub trait Field
 where
     Self: Focusable,
 {
+    fn get_id(&self) -> String;
     fn get_value(&mut self) -> String;
     fn constraint(&self) -> Constraint;
     fn set_value(&mut self, value: &str);

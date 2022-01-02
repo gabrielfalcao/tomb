@@ -5,6 +5,7 @@ use super::super::ui::*;
 use crate::app::log_error;
 
 use crate::ironpunk::*;
+use std::collections::BTreeMap;
 
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use std::io;
@@ -21,12 +22,12 @@ use tui::{
 pub struct Form {
     pub id: String,
     pub title: Option<String>,
-    pub fields: Vec<SharedField>,
+    pub fields: BTreeMap<String, SharedField>,
     pub selected_index: Option<usize>,
 }
 /// Form with editable content
 impl Form {
-    pub fn new(id: &str, title: Option<String>, fields: Vec<SharedField>) -> Form {
+    pub fn new(id: &str, title: Option<String>, fields: BTreeMap<String, SharedField>) -> Form {
         Form {
             id: String::from(id),
             title,
@@ -38,7 +39,8 @@ impl Form {
     where
         T: Field,
     {
-        self.fields.push(Rc::new(RefCell::new(field)));
+        self.fields
+            .insert(String::from(field.id()), Rc::new(RefCell::new(field)));
     }
     pub fn set_title(&mut self, title: &str) {
         self.title = Some(String::from(title));
@@ -47,6 +49,10 @@ impl Form {
         self.title = None;
     }
     pub fn tab(&mut self, shift: bool) {
+        let total_fields = self.fields.len();
+        if total_fields == 0 {
+            return;
+        }
         match self.selected_index.clone() {
             Some(index) => {
                 log_error(format!("selected form field: {:?}", index));
@@ -59,7 +65,11 @@ impl Form {
                 } else {
                     index + 1
                 };
-                self.selected_index = Some(new_index % self.fields.len());
+                self.selected_index = Some(if new_index > 0 {
+                    new_index % total_fields
+                } else {
+                    0
+                });
             }
             None => {
                 log_error(format!("selected form field: {:?}", 0));
@@ -68,14 +78,14 @@ impl Form {
         };
     }
     pub fn blur(&mut self) {
-        for field in self.fields.iter_mut() {
+        for (id, field) in self.fields.iter_mut() {
             field.borrow_mut().blur();
         }
         self.selected_index = None;
     }
     pub fn field_constraints(&self) -> Vec<Constraint> {
         let mut result = Vec::new();
-        for field in &self.fields {
+        for (id, field) in self.fields.iter() {
             result.push(field.borrow().constraint());
         }
         result
@@ -96,7 +106,7 @@ impl Component for Form {
     ) -> Result<(), Error> {
         let chunks = vertical_stack(chunk, self.field_constraints());
 
-        for (i, field) in self.fields.iter_mut().enumerate() {
+        for (i, (id, field)) in self.fields.iter_mut().enumerate() {
             let chunk = chunks[i];
             match self.selected_index.clone() {
                 Some(index) => {

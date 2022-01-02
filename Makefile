@@ -6,7 +6,7 @@ PLAINTEXT			:="Hello World"
 export TOMB_CONFIG		:= .tomb-config.yaml
 export TOMB_KEY			:= .tomb-key.yaml
 export TOMB_FILE		:= .tomb-file.yaml
-export TOMB_LOG			:= .tomb.log
+export TOMB_LOG			:= tomb.log
 
 all: fix release
 
@@ -14,8 +14,8 @@ clean: cls
 	@rm -f $(TOMB_FILE) $(TOMB_KEY)
 	@rm -fr 0b4sk8d
 	@rm -fr *.aes
-	@rm -fr *.yaml
-	@rm -f *.log
+	@rm -fr {.,}*.yaml
+	@rm -f {.,}*.log
 	@touch {ironpunk,tomb}.log
 
 cls:

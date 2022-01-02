@@ -11,7 +11,7 @@ use tui::{
     backend::CrosstermBackend,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
-    text::{Span, Spans},
+    text::Text,
     widgets::{Block, BorderType, Borders, Paragraph, Wrap},
     Frame, Terminal,
 };
@@ -71,10 +71,7 @@ impl Component for Modal {
             .title(self.title.clone())
             .border_type(BorderType::Rounded);
 
-        let text = vec![Spans::from(Span::styled(
-            self.text.clone(),
-            paragraph_style(),
-        ))];
+        let text = Text::from(self.text.clone());
         let paragraph = Paragraph::new(text)
             .block(modal)
             .style(paragraph_style())

@@ -11,18 +11,11 @@ use shellexpand;
 use std::fmt;
 
 pub const TOMB_CONFIG: &'static str = "~/.tomb.config.yaml";
-pub const TOMB_LOG: &'static str = "~/.tomb.log";
 
 pub fn default_tomb_config_filename() -> String {
     match std::env::var("TOMB_CONFIG") {
         Ok(filename) => String::from(shellexpand::tilde(&filename)),
         Err(_error) => String::from(TOMB_CONFIG),
-    }
-}
-pub fn default_log_filename() -> String {
-    match std::env::var("TOMB_LOG") {
-        Ok(filename) => String::from(shellexpand::tilde(&filename)),
-        Err(_error) => String::from(TOMB_LOG),
     }
 }
 #[derive(Debug, Clone)]
@@ -63,13 +56,14 @@ pub struct ColorTheme {
 impl ColorTheme {
     pub fn builtin() -> ColorTheme {
         ColorTheme {
-            default: "995500".to_string(),
-            light: "FFCC00".to_string(),
-            blurred: "gray".to_string(),
-            default_fg: "FFFFFF".to_string(),
-            default_bg: "101010".to_string(),
-            error_fg: "9B9B9B".to_string(),
-            error_bg: "101010".to_string(),
+            // https://coolors.co/palletes/trending :)
+            default: "#4f5d75".to_string(),
+            light: "#ffd400".to_string(),
+            blurred: "#998a63".to_string(),
+            default_fg: "#f5cb5c".to_string(),
+            default_bg: "#001219".to_string(),
+            error_fg: "#ff7f51".to_string(),
+            error_bg: "#242423".to_string(),
         }
     }
 }

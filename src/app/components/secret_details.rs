@@ -3,12 +3,13 @@
 #![allow(dead_code)]
 
 pub use super::super::components::{menu::Menu, modal::Modal, searchbox::SearchBox};
-pub use super::super::form::{Form, TextField};
+pub use super::super::form::{Form, SecretField, TextField};
 use super::super::geometry::*;
 pub use super::super::state::*;
 use super::super::ui;
 use crate::app::log_error;
 use chrono::prelude::*;
+use std::collections::BTreeMap;
 
 use crate::ironpunk::*;
 #[cfg(feature = "osx")]
@@ -38,6 +39,7 @@ pub struct SecretDetails<'a> {
     tomb_config: TombConfig,
     visible: bool,
     form: Form,
+    secret_field: SecretField,
     phantom: PhantomData<&'a List<'a>>,
 }
 
@@ -49,25 +51,57 @@ impl<'a> SecretDetails<'a> {
         tomb_config: TombConfig,
         visible: bool,
     ) -> SecretDetails<'a> {
+        let secret_field = SecretField::new(
+            "secret-value-field",
+            "value",
+            true,
+            secret.clone(),
+            tomb.clone(),
+            key.clone(),
+        );
+        let form = Form::new(
+            "secret-details",
+            Some(String::from("Details Title")),
+            BTreeMap::new(),
+        );
         SecretDetails {
             key,
             tomb,
             secret,
             tomb_config,
             visible,
-            form: Form::new(
-                "secret-details",
-                Some(String::from("Details Title")),
-                Vec::new(),
-            ),
+            form,
+            secret_field,
             phantom: PhantomData,
         }
     }
     pub fn set_visible(&mut self, visible: bool) {
         self.visible = visible;
+        self.secret_field.set_visible(visible);
+    }
+    pub fn get_field(&self, id: &str) -> Option<SharedField> {
+        match self.form.fields.clone().get(id) {
+            Some(field) => Some(field.clone()),
+            None => None,
+        }
     }
     pub fn set_secret(&mut self, secret: AES256Secret) {
-        self.secret = Some(secret);
+        self.secret = Some(secret.clone());
+        match &mut self.get_field("secret-value-field") {
+            Some(field) => match self.get_plaintext(&secret) {
+                Ok(plaintext) => {
+                    field.borrow_mut().set_value(plaintext.as_str());
+                }
+                Err(error) => {
+                    log_error(format!(
+                        "cannot set secret for field {}: {}",
+                        field.borrow().get_id(),
+                        error
+                    ));
+                }
+            },
+            None => {}
+        }
     }
     pub fn tab(&mut self, shift: bool) {
         self.form.tab(shift);
@@ -110,21 +144,6 @@ impl<'a> SecretDetails<'a> {
 
         let field_digest =
             TextField::new("secret-digest-field", "digest", format!("{}", digest), true);
-        let field_value = TextField::new(
-            "secret-value-field",
-            "value",
-            match self.visible {
-                true => {
-                    let secret = secret.clone();
-                    match self.get_plaintext(&secret) {
-                        Ok(plaintext) => plaintext,
-                        Err(err) => format!("{}", err),
-                    }
-                }
-                false => secret.value,
-            },
-            true,
-        );
         let field_notes = TextField::new(
             "secret-notes-field",
             "notes",
@@ -143,7 +162,7 @@ impl<'a> SecretDetails<'a> {
 
         self.form.add_field(field_name);
         self.form.add_field(field_group);
-        self.form.add_field(field_value);
+        self.form.add_field(self.secret_field.clone());
         self.form.add_field(field_updated_at);
         self.form.add_field(field_digest);
         self.form.add_field(field_notes);
@@ -192,11 +211,11 @@ impl Component for SecretDetails<'_> {
     ) -> Result<LoopEvent, Error> {
         match event.code {
             KeyCode::Down => {
-                self.form.tab(false);
+                self.tab(false);
                 Ok(Propagate)
             }
             KeyCode::Up => {
-                self.form.tab(true);
+                self.tab(true);
                 Ok(Propagate)
             }
             KeyCode::Tab => Ok(Prevent),

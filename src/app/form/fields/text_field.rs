@@ -21,11 +21,10 @@ pub struct TextField {
     pub title: Option<String>,
     pub value: String,
     pub id: String,
-    buf: String, // editable buffer
-    focused: bool,
-    read_only: bool,
+    pub focused: bool,
+    pub read_only: bool,
 }
-/// TextField with editable content
+
 impl TextField {
     pub fn new(id: &str, title: &str, value: String, read_only: bool) -> TextField {
         TextField {
@@ -33,7 +32,6 @@ impl TextField {
             title: Some(String::from(title)),
             value: value.clone(),
             focused: false,
-            buf: value.clone(),
             read_only: read_only,
         }
     }
@@ -44,10 +42,10 @@ impl TextField {
         self.title = None;
     }
     pub fn write(&mut self, c: char) {
-        self.buf.push(c);
+        self.value.push(c);
     }
     pub fn backspace(&mut self) {
-        self.buf.pop();
+        self.value.pop();
     }
 }
 
@@ -75,7 +73,7 @@ impl Component for TextField {
             Some(title) => modal.title(title.clone()),
             None => modal,
         };
-        let text = Text::from(self.buf.clone());
+        let text = Text::from(self.get_value());
         let paragraph = Paragraph::new(text)
             .block(modal)
             .style(paragraph_style())
@@ -131,6 +129,9 @@ impl Focusable for TextField {
 }
 
 impl Field for TextField {
+    fn get_id(&self) -> String {
+        self.id.clone()
+    }
     fn set_value(&mut self, value: &str) {
         self.value = String::from(value);
     }
