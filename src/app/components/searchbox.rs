@@ -10,7 +10,7 @@ use tui::{
     backend::CrosstermBackend,
     layout::{Alignment, Rect},
     style::{Color, Style},
-    text::{Span, Spans},
+    text::{Span, Spans, Text},
     widgets::{Block, BorderType, Borders, Paragraph, Wrap},
     Frame, Terminal,
 };
@@ -48,13 +48,9 @@ impl SearchBox {
             .title("Search using glob patterns (<Esc> / <Enter>)")
             .border_type(BorderType::Rounded);
 
-        let text = vec![Spans::from(Span::styled(
-            self.tmp.clone(),
-            paragraph_style(),
-        ))];
+        let text = Text::from(self.tmp.clone());
         let paragraph = Paragraph::new(text)
             .block(modal)
-            .style(paragraph_style())
             .alignment(Alignment::Left)
             .wrap(Wrap { trim: false });
 
