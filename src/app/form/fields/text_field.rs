@@ -76,7 +76,11 @@ impl Component for TextField {
         let text = Text::from(self.get_value());
         let paragraph = Paragraph::new(text)
             .block(modal)
-            .style(paragraph_style())
+            .style(if self.focused {
+                paragraph_style().fg(color_light())
+            } else {
+                paragraph_style()
+            })
             .alignment(Alignment::Left)
             .wrap(Wrap { trim: false });
 

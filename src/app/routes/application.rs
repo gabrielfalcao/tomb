@@ -257,6 +257,7 @@ impl Component for Application<'_> {
             false => {
                 match code {
                     KeyCode::Esc => {
+                        self.set_visible(false);
                         self.details.blur();
                         self.focused = FocusedComponent::Sidebar;
                     }

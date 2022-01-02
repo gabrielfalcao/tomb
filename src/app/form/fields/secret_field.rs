@@ -87,13 +87,18 @@ impl Component for SecretField {
         parent: &mut Frame<CrosstermBackend<io::Stdout>>,
         chunk: Rect,
     ) -> Result<(), Error> {
+        let style = if self.field.focused {
+            block_style().fg(if self.visible {
+                color_error_fg()
+            } else {
+                color_light()
+            })
+        } else {
+            block_style()
+        };
         let modal = Block::default()
             .borders(Borders::ALL)
-            .style(if self.field.focused {
-                block_style().fg(color_light())
-            } else {
-                block_style()
-            })
+            .style(style)
             .border_type(BorderType::Thick);
         let modal = match &self.field.title {
             Some(title) => modal.title(title.clone()),
@@ -102,7 +107,7 @@ impl Component for SecretField {
         let text = Text::from(self.get_value());
         let paragraph = Paragraph::new(text)
             .block(modal)
-            .style(paragraph_style())
+            .style(style)
             .alignment(Alignment::Left)
             .wrap(Wrap { trim: false });
 
