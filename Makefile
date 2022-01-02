@@ -64,9 +64,9 @@ tomb-init: build cls
 	$(TOMB_BIN) init -K 1111 -S 2222 -I 3333 --password $(PASSWORD)
 
 tomb-save: build cls
-	$(TOMB_BIN) save 'work/gmail' 'Sup@DupAs3cr3T'
-	$(TOMB_BIN) save 'work/vpn' 'Sup@1wadsaa'
-	$(TOMB_BIN) save 'work/employee_id' '42069'
+	$(TOMB_BIN) save '/work/gmail' 'Sup@DupAs3cr3T'
+	$(TOMB_BIN) save '/work/vpn' 'Sup@1wadsaa'
+	$(TOMB_BIN) save '/work/employee_id' '42069'
 	$(TOMB_BIN) save '/gmail/my@gmail.com' 's(22;@dup3cr3t'
 	$(TOMB_BIN) save '/spotify' 'COCCOp@d99'
 	$(TOMB_BIN) save '/netflix' '42069'

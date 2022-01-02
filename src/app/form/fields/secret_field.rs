@@ -94,7 +94,11 @@ impl Component for SecretField {
                 color_light()
             })
         } else {
-            block_style()
+            if self.visible {
+                default_style().fg(color_light())
+            } else {
+                block_style()
+            }
         };
         let modal = Block::default()
             .borders(Borders::ALL)
