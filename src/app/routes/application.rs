@@ -224,6 +224,14 @@ impl<'a> Application<'a> {
             }
         }
         self.log_visibility();
+
+        // match self.selected_secret() {
+        //     Ok(secret) => {
+        //         self.details.set_visible(self.visible);
+        //         self.details.set_secret(secret);
+        //     }
+        //     Err(_) => {}
+        // }
     }
 }
 

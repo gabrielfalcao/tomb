@@ -118,8 +118,12 @@ impl Component for About<'_> {
         _router: SharedRouter,
     ) -> Result<LoopEvent, Error> {
         match event.code {
-            KeyCode::Esc => {
+            KeyCode::Esc | KeyCode::Char('s') => {
                 context.borrow_mut().goto("/");
+                Ok(Refresh)
+            }
+            KeyCode::Char('h') => {
+                context.borrow_mut().goto("/help");
                 Ok(Refresh)
             }
             KeyCode::Char('q') => Ok(Quit),
