@@ -65,12 +65,14 @@ Keyboard Shortcuts:
 
     'tab' focus on secret metadata
     'esc' focus on list of secrets
+    'up' and 'down' arrows browse secret or its metadata fields
     'f' to filter
     't' toggle visibility
     'r' reveal
     'c' copy to clipboard
-    '?' or 'h' show this help
-    'a' about
+    '?' or 'h' show this screen
+    'a' show about screen
+    'left' and 'right' move between screens
 "#,
         ))
         .style(ui::default_style().fg(ui::color_light()))
