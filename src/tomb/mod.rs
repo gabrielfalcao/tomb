@@ -309,7 +309,12 @@ impl AES256Tomb {
             None => Err(Error::with_message(format!("key not found {}", path))),
         }
     }
-    pub fn add_secret(&mut self, path: &str, plaintext: String, key: Key) -> Result<(), Error> {
+    pub fn add_secret(
+        &mut self,
+        path: &str,
+        plaintext: String,
+        key: Key,
+    ) -> Result<AES256Secret, Error> {
         self.add_secret_from_bytes(path, Vec::from(plaintext), key)
     }
     pub fn add_secret_from_bytes(
@@ -317,7 +322,7 @@ impl AES256Tomb {
         path: &str,
         plaintext: Vec<u8>,
         key: Key,
-    ) -> Result<(), Error> {
+    ) -> Result<AES256Secret, Error> {
         let cyphertext = match key.encrypt(&plaintext) {
             Ok(cypher) => cypher,
             Err(error) => {
@@ -329,8 +334,8 @@ impl AES256Tomb {
             }
         };
         let secret = AES256Secret::new(String::from(path), cyphertext, key);
-        self.data.insert(secret.key(), secret);
-        Ok(())
+        self.data.insert(secret.key(), secret.clone());
+        Ok(secret.clone())
     }
     pub fn derive_key(&self, password: &str) -> Key {
         Key::from_password(password.as_bytes(), &self.config)
@@ -372,7 +377,7 @@ impl AES256Tomb {
 mod tests {
     use crate::aes256cbc::Config as AesConfig;
     use crate::aes256cbc::Key;
-    use crate::tomb::AES256Tomb;
+    use crate::tomb::{AES256Secret, AES256Tomb};
     use k9::assert_equal;
 
     fn generate_key() -> (Key, AesConfig) {
@@ -418,5 +423,18 @@ mod tests {
 
         let last = tomb.list("another-*").expect("failed to list another-*");
         assert_equal!(last.len(), 1);
+    }
+    #[test]
+    fn test_secret_group() {
+        let (key, _) = generate_key();
+
+        assert_equal!(
+            AES256Secret::new("/foo/bar".to_string(), Vec::new(), key.clone()).group(),
+            String::from("/foo")
+        );
+        assert_equal!(
+            AES256Secret::new("/bar".to_string(), Vec::new(), key.clone()).group(),
+            String::from("/")
+        );
     }
 }
