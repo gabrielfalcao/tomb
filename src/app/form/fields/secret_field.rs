@@ -146,6 +146,13 @@ impl Focusable for SecretField {
 }
 
 impl Field for SecretField {
+    fn write(&mut self, c: char) {
+        self.field.write(c)
+    }
+    fn backspace(&mut self) {
+        self.field.backspace()
+    }
+
     fn get_id(&self) -> String {
         self.field.id()
     }

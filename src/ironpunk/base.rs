@@ -203,6 +203,8 @@ where
     fn set_value(&mut self, value: &str);
     fn get_visible(&mut self) -> bool;
     fn set_visible(&mut self, visible: bool);
+    fn write(&mut self, c: char);
+    fn backspace(&mut self);
 }
 
 pub trait Route

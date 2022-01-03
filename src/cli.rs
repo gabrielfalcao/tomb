@@ -283,7 +283,7 @@ fn ui_command(matches: &ArgMatches) {
 
     let tomb_config = TombConfig::load();
     let aes_config = AesConfig::default().unwrap_or(AesConfig::builtin(None));
-    let tick_interval = matches.value_of("tick_interval").unwrap_or("314");
+    let tick_interval = matches.value_of("tick_interval").unwrap_or("3145");
     let tick_interval = match tick_interval.parse::<u64>() {
         Ok(tick_interval) => tick_interval,
         Err(err) => {

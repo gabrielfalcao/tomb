@@ -1,4 +1,5 @@
 #![allow(unused_variables)]
+#![allow(unused_imports)]
 #![allow(dead_code)]
 use crate::app::log_error;
 use crate::app::ui::*;
@@ -38,12 +39,6 @@ impl TextField {
     }
     pub fn remove_title(&mut self) {
         self.title = None;
-    }
-    pub fn write(&mut self, c: char) {
-        self.value.push(c);
-    }
-    pub fn backspace(&mut self) {
-        self.value.pop();
     }
 }
 
@@ -130,6 +125,12 @@ impl Focusable for TextField {
 }
 
 impl Field for TextField {
+    fn write(&mut self, c: char) {
+        self.value.push(c);
+    }
+    fn backspace(&mut self) {
+        self.value.pop();
+    }
     fn get_id(&self) -> String {
         self.id.clone()
     }
@@ -139,7 +140,6 @@ impl Field for TextField {
     fn set_title(&mut self, title: &str) {
         self.title = Some(String::from(title));
     }
-
     fn set_value(&mut self, value: &str) {
         self.value = String::from(value);
     }

@@ -1,3 +1,7 @@
+#![allow(unused_variables)]
+#![allow(unused_imports)]
+#![allow(dead_code)]
+
 use super::super::components::menu::Menu;
 use super::super::geometry::*;
 use super::super::ui;

@@ -50,12 +50,11 @@ impl Menu {
     }
     pub fn default(selected: &str) -> Menu {
         let mut menu = Menu::empty();
-        menu.add_item("Secrets", KeyCode::Char('S'), "/").unwrap();
-        menu.add_item("Help", KeyCode::Char('H'), "/help").unwrap();
-        menu.add_item("Configuration", KeyCode::Char('C'), "/config")
-            .unwrap();
-        menu.add_item("About", KeyCode::Char('A'), "/about")
-            .unwrap();
+        menu.add_item("Secrets", KeyCode::Char('S'), "/");
+        menu.add_item("Help", KeyCode::Char('H'), "/help");
+        menu.add_item("Configuration", KeyCode::Char('C'), "/config");
+
+        menu.add_item("About", KeyCode::Char('A'), "/about");
         menu.select(selected).unwrap_or(());
         menu
     }
@@ -125,7 +124,11 @@ impl Menu {
                     self.selected = Some(selected + 1);
                 }
             }
-            None => {}
+            None => {
+                if self.labels.len() > 0 {
+                    self.selected = Some(0);
+                }
+            }
         }
     }
     pub fn previous(&mut self) {
@@ -135,10 +138,15 @@ impl Menu {
                     self.selected = Some(selected - 1);
                 }
             }
-            None => {}
+            None => {
+                let count = self.labels.len();
+                if count > 0 {
+                    self.selected = Some(count - 1);
+                }
+            }
         }
     }
-    pub fn add_item(&mut self, title: &str, code: KeyCode, route_path: &str) -> Result<(), Error> {
+    pub fn add_item(&mut self, title: &str, code: KeyCode, route_path: &str) {
         let label = String::from(title);
         let item = MenuItem::new(label.clone(), code, String::from(route_path));
         self.labels.push(label.clone());
@@ -146,7 +154,6 @@ impl Menu {
         if self.selected == None {
             self.selected = Some(0)
         }
-        Ok(())
     }
     pub fn remove_item(&mut self, item: &str) -> Result<(), Error> {
         match self.index_of(item) {
@@ -211,20 +218,22 @@ impl Component for Menu {
                 self.next();
                 return match self.current() {
                     Some(selected) => {
+                        self.select_by_location(selected.route_path.clone());
                         context.borrow_mut().goto(&selected.route_path);
                         return Ok(Refresh);
                     }
-                    None => Ok(Propagate),
+                    None => Ok(Refresh),
                 };
             }
             KeyCode::Left => {
                 self.previous();
                 return match self.current() {
                     Some(selected) => {
+                        self.select_by_location(selected.route_path.clone());
                         context.borrow_mut().goto(&selected.route_path);
                         return Ok(Refresh);
                     }
-                    None => Ok(Propagate),
+                    None => Ok(Refresh),
                 };
             }
             code => {
@@ -233,7 +242,7 @@ impl Component for Menu {
                 }
                 if code == KeyCode::Esc {
                     context.borrow_mut().goto("/");
-                    return Ok(Propagate);
+                    return Ok(Refresh);
                 }
 
                 for (label, item) in &self.items {

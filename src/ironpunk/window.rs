@@ -115,7 +115,7 @@ impl Component for Window<'_> {
                         context.borrow_mut().error.set_error(err);
                         return Ok(Refresh);
                     }
-                    ok => return ok,
+                    result => return result,
                 }
             }
             Err(error_string) => {

@@ -153,10 +153,10 @@ impl Component for Form {
             // forward keyboard event to focused_field
             _ => match self.focused_field() {
                 Some((title, field)) => {
-                    log_error(format!(
-                        "forwarding keyboard event {:?} to field {}",
-                        event, title,
-                    ));
+                    // log_error(format!(
+                    //     "forwarding keyboard event {:?} to field {}",
+                    //     event, title,
+                    // ));
 
                     field
                         .borrow_mut()

@@ -1,4 +1,5 @@
 #![allow(unused_variables)]
+#![allow(unused_imports)]
 #![allow(dead_code)]
 
 pub use super::super::components::{menu::Menu, modal::Modal, searchbox::SearchBox};
@@ -188,6 +189,7 @@ impl Component for SecretDetails<'_> {
         match &self.secret {
             Some(secret) => {
                 let secret = secret.clone();
+                // form must be repopulated since the secret Optional
                 self.populate_form(secret);
                 self.form.render_in_parent(parent, chunk)?;
             }

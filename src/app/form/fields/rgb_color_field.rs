@@ -1,5 +1,7 @@
 #![allow(unused_variables)]
+#![allow(unused_imports)]
 #![allow(dead_code)]
+use crate::app::geometry::*;
 use crate::app::log_error;
 use crate::app::ui::*;
 
@@ -46,18 +48,9 @@ impl RGBColorField {
     pub fn remove_title(&mut self) {
         self.title = None;
     }
-    pub fn write(&mut self, c: char) {
-        self.value.push(c);
-    }
-    pub fn backspace(&mut self) {
-        self.value.pop();
-    }
-    pub fn to_color(&mut self) -> Color {
-        let color = self.value.clone();
-        match rgb_to_color(color.as_str()) {
-            Some(color) => color,
-            None => color_default(),
-        }
+    pub fn to_color(&mut self) -> Option<Color> {
+        let color = self.get_value();
+        rgb_to_color(color.as_str())
     }
 }
 
@@ -73,6 +66,8 @@ impl Component for RGBColorField {
         parent: &mut Frame<CrosstermBackend<io::Stdout>>,
         chunk: Rect,
     ) -> Result<(), Error> {
+        let (left, right) = horizontal_split(chunk);
+
         let modal = Block::default()
             .borders(Borders::ALL)
             .style(if self.focused {
@@ -89,14 +84,35 @@ impl Component for RGBColorField {
         let paragraph = Paragraph::new(text)
             .block(modal)
             .style(if self.focused {
-                paragraph_style().fg(self.to_color())
+                paragraph_style().fg(color_light())
             } else {
-                paragraph_style().fg(self.to_color())
+                paragraph_style()
             })
             .alignment(Alignment::Left)
             .wrap(Wrap { trim: false });
 
-        parent.render_widget(paragraph, chunk);
+        let color_style = block_style()
+            .bg(match self.to_color() {
+                Some(color) => color,
+                None => color_default_bg(),
+            })
+            .fg(color_default_bg());
+        let color = Paragraph::new(match self.to_color() {
+            Some(color) => String::new(),
+            None => format!("invalid rgb hex"),
+        })
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .style(color_style)
+                .border_type(BorderType::Thick),
+        )
+        .style(color_style)
+        .alignment(Alignment::Left)
+        .wrap(Wrap { trim: true });
+
+        parent.render_widget(paragraph, left);
+        parent.render_widget(color, right);
 
         Ok(())
     }
@@ -111,15 +127,14 @@ impl Component for RGBColorField {
         match event.code {
             KeyCode::Backspace => {
                 self.backspace();
-                Ok(Propagate)
+                Ok(Refresh)
             }
             KeyCode::Esc => {
                 self.blur();
-                return Ok(Propagate);
+                return Ok(Refresh);
             }
             KeyCode::Enter => {
-                self.write('\n');
-                return Ok(Propagate);
+                return Ok(Refresh);
             }
             KeyCode::Char(c) => {
                 self.write(c);
@@ -145,6 +160,12 @@ impl Focusable for RGBColorField {
 }
 
 impl Field for RGBColorField {
+    fn write(&mut self, c: char) {
+        self.value.push(c);
+    }
+    fn backspace(&mut self) {
+        self.value.pop();
+    }
     fn get_id(&self) -> String {
         self.id.clone()
     }
@@ -154,7 +175,6 @@ impl Field for RGBColorField {
     fn set_title(&mut self, title: &str) {
         self.title = Some(String::from(title));
     }
-
     fn set_value(&mut self, value: &str) {
         self.value = String::from(value);
     }

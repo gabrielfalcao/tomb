@@ -91,7 +91,7 @@ tomb-ui: clean tomb-init tomb-save
 	$(TOMB_BIN) ui -T 1000
 
 ui:
-	cargo run --bin tomb ui -T 500
+	cargo run --bin tomb ui -T 2000
 
 obfuskat3: cls 0b4sk8d.yaml
 
