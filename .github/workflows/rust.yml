@@ -25,6 +25,11 @@ jobs:
         with:
           command: test
 
+      - name: cargo tarpaulin
+        uses: actions-rs/tarpaulin@v0.1
+        with:
+          args: '-- --test-threads 1'
+
   e2e_test:
     name: End-to-end Test
     runs-on: ubuntu-latest
