@@ -16,10 +16,13 @@ use tui::{
     Terminal,
 };
 
+const COMPONENT_NAME: &'static str = "Help";
+
 #[allow(dead_code)]
 #[derive(Clone)]
 pub struct Help<'a> {
     tomb_config: TombConfig,
+    menu: Menu,
     phantom: PhantomData<&'a Option<()>>,
 }
 
@@ -27,6 +30,7 @@ impl<'a> Help<'a> {
     pub fn new(tomb_config: TombConfig) -> Help<'a> {
         Help {
             tomb_config,
+            menu: Menu::default(COMPONENT_NAME),
             phantom: PhantomData,
         }
     }
@@ -34,10 +38,10 @@ impl<'a> Help<'a> {
 
 impl Component for Help<'_> {
     fn name(&self) -> &str {
-        "Help"
+        COMPONENT_NAME
     }
     fn id(&self) -> String {
-        String::from("Help")
+        String::from(COMPONENT_NAME)
     }
     fn render_in_parent(
         &mut self,
@@ -45,13 +49,9 @@ impl Component for Help<'_> {
         chunk: Rect,
     ) -> Result<(), Error> {
         let (header, chunk, footer) = vertical_stack(chunk);
+        self.menu.render_in_parent(rect, header)?;
+        self.menu.render_in_parent(rect, footer)?;
 
-        Menu::default("Help")
-            .render_in_parent(rect, header)
-            .unwrap();
-        Menu::default("Help")
-            .render_in_parent(rect, footer)
-            .unwrap();
         let block = Block::default()
             .borders(Borders::ALL)
             .style(ui::default_style().fg(ui::color_default()))
@@ -62,16 +62,22 @@ impl Component for Help<'_> {
             r#"
 Keyboard Shortcuts:
 ~~~~~~~~~~~~~~~~~~~
+  'f' to filter secrets by path using glob patterns
+  'tab' focus on secret metadata
+  'esc' focus on list of secrets
+  'up' and 'down' arrows browse secrets or their metadata fields
 
-    'tab' focus on secret metadata
-    'esc' focus on list of secrets
-    'up' and 'down' arrows browse secret or its metadata fields
-    'f' to filter
+  Secrets
+  ~~~~~~~
     't' toggle visibility
     'r' reveal
     'c' copy to clipboard
-    '?' or 'h' show this screen
-    'a' show about screen
+
+  Screens
+  ~~~~~~~
+    'H' or '?' show this help screen
+    'C' show configuration screen
+    'A' show about screen
     'left' and 'right' move between screens
 "#,
         ))
@@ -88,33 +94,9 @@ Keyboard Shortcuts:
         event: KeyEvent,
         terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
         context: SharedContext,
-        _router: SharedRouter,
+        router: SharedRouter,
     ) -> Result<LoopEvent, Error> {
-        match event.code {
-            KeyCode::Esc | KeyCode::Char('s') => {
-                context.borrow_mut().goto("/");
-                Ok(Refresh)
-            }
-            KeyCode::Char('a') => {
-                context.borrow_mut().goto("/about");
-                Ok(Refresh)
-            }
-            KeyCode::Char('q') => Ok(Quit),
-            KeyCode::Left => {
-                context.borrow_mut().goback();
-                Ok(Refresh)
-            }
-            KeyCode::Right => {
-                context.borrow_mut().goto("/about");
-                Ok(Refresh)
-            }
-            _ => {
-                if event.modifiers == KeyModifiers::CONTROL && event.code == KeyCode::Char('q') {
-                    return Ok(Quit);
-                }
-                Ok(Propagate)
-            }
-        }
+        self.menu.process_keyboard(event, terminal, context, router)
     }
 }
 impl Route for Help<'_> {}

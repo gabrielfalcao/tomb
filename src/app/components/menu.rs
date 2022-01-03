@@ -1,6 +1,7 @@
 #![allow(unused_variables)]
 
 use super::super::ui;
+use crate::app::log_error;
 use crate::ironpunk::*;
 use crossterm::event::{KeyCode, KeyEvent};
 use std::{collections::BTreeMap, io};
@@ -49,9 +50,11 @@ impl Menu {
     }
     pub fn default(selected: &str) -> Menu {
         let mut menu = Menu::empty();
-        menu.add_item("Secrets", KeyCode::Char('s'), "/").unwrap();
-        menu.add_item("Help", KeyCode::Char('h'), "/help").unwrap();
-        menu.add_item("About", KeyCode::Char('a'), "/about")
+        menu.add_item("Secrets", KeyCode::Char('S'), "/").unwrap();
+        menu.add_item("Help", KeyCode::Char('H'), "/help").unwrap();
+        menu.add_item("Configuration", KeyCode::Char('C'), "/config")
+            .unwrap();
+        menu.add_item("About", KeyCode::Char('A'), "/about")
             .unwrap();
         menu.select(selected).unwrap_or(());
         menu
@@ -203,41 +206,50 @@ impl Component for Menu {
         context: SharedContext,
         router: SharedRouter,
     ) -> Result<LoopEvent, Error> {
-        let code = event.code;
-
-        match code {
+        match event.code {
             KeyCode::Right => {
                 self.next();
-                match self.current() {
+                return match self.current() {
                     Some(selected) => {
                         context.borrow_mut().goto(&selected.route_path);
                         return Ok(Refresh);
                     }
-                    None => {}
-                }
+                    None => Ok(Propagate),
+                };
             }
             KeyCode::Left => {
                 self.previous();
-                match self.current() {
+                return match self.current() {
                     Some(selected) => {
                         context.borrow_mut().goto(&selected.route_path);
                         return Ok(Refresh);
                     }
-                    None => {}
-                }
+                    None => Ok(Propagate),
+                };
             }
             code => {
+                if code == KeyCode::Char('q') {
+                    return Ok(Quit);
+                }
+                if code == KeyCode::Esc {
+                    context.borrow_mut().goto("/");
+                    return Ok(Propagate);
+                }
+
                 for (label, item) in &self.items {
                     let label = label.clone();
                     if item.code == code {
                         match self.select(&label) {
-                            Ok(_) => return Ok(Propagate),
-                            Err(error) => return Ok(Quit),
+                            Ok(_) => return Ok(Refresh),
+                            Err(error) => {
+                                log_error(format!("Menu.process_keyboard(): {}", error));
+                                return Ok(Quit);
+                            }
                         };
                     }
                 }
             }
         }
-        Ok(Refresh)
+        Ok(Propagate)
     }
 }

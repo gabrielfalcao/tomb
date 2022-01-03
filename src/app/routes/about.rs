@@ -1,3 +1,6 @@
+#![allow(unused_imports)]
+#![allow(unused_variables)]
+
 use super::super::components::menu::Menu;
 use super::super::geometry::*;
 use super::super::ui;
@@ -15,10 +18,13 @@ use tui::{
     Terminal,
 };
 
+const COMPONENT_NAME: &'static str = "About";
+
 #[allow(dead_code)]
 #[derive(Clone)]
 pub struct About<'a> {
     tomb_config: TombConfig,
+    menu: Menu,
     phantom: PhantomData<&'a Option<()>>,
 }
 
@@ -26,6 +32,7 @@ impl<'a> About<'a> {
     pub fn new(tomb_config: TombConfig) -> About<'a> {
         About {
             tomb_config,
+            menu: Menu::default(COMPONENT_NAME),
             phantom: PhantomData,
         }
     }
@@ -33,10 +40,10 @@ impl<'a> About<'a> {
 
 impl Component for About<'_> {
     fn name(&self) -> &str {
-        "About"
+        COMPONENT_NAME
     }
     fn id(&self) -> String {
-        String::from("About")
+        String::from(COMPONENT_NAME)
     }
     fn render_in_parent(
         &mut self,
@@ -45,12 +52,8 @@ impl Component for About<'_> {
     ) -> Result<(), Error> {
         let (header, chunk, footer) = vertical_stack(chunk);
 
-        Menu::default("About")
-            .render_in_parent(rect, header)
-            .unwrap();
-        Menu::default("About")
-            .render_in_parent(rect, footer)
-            .unwrap();
+        self.menu.render_in_parent(rect, header)?;
+        self.menu.render_in_parent(rect, footer)?;
         let version = format!("Version {}", version());
         let block = Block::default()
             .borders(Borders::ALL)
@@ -114,33 +117,9 @@ impl Component for About<'_> {
         event: KeyEvent,
         terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
         context: SharedContext,
-        _router: SharedRouter,
+        router: SharedRouter,
     ) -> Result<LoopEvent, Error> {
-        match event.code {
-            KeyCode::Esc | KeyCode::Char('s') => {
-                context.borrow_mut().goto("/");
-                Ok(Refresh)
-            }
-            KeyCode::Char('h') => {
-                context.borrow_mut().goto("/help");
-                Ok(Refresh)
-            }
-            KeyCode::Char('q') => Ok(Quit),
-            KeyCode::Left => {
-                context.borrow_mut().goback();
-                Ok(Refresh)
-            }
-            KeyCode::Right => {
-                context.borrow_mut().goto("/");
-                Ok(Refresh)
-            }
-            _ => {
-                if event.modifiers == KeyModifiers::CONTROL && event.code == KeyCode::Char('q') {
-                    return Ok(Quit);
-                }
-                Ok(Propagate)
-            }
-        }
+        self.menu.process_keyboard(event, terminal, context, router)
     }
 }
 impl Route for About<'_> {}

@@ -1,10 +1,12 @@
+pub mod color_config;
 pub mod confirmation;
 pub mod menu;
 pub mod modal;
 pub mod searchbox;
+pub mod secret_details;
+pub use color_config::*;
 pub use confirmation::*;
 pub use menu::*;
 pub use modal::*;
 pub use searchbox::*;
-pub mod secret_details;
 pub use secret_details::*;

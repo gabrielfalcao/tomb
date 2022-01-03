@@ -39,6 +39,10 @@ pub fn start(
         Rc::new(RefCell::new(About::new(tomb_config.clone()))),
     );
     router.add(
+        "/config",
+        Rc::new(RefCell::new(Configuration::new(tomb_config.clone()))),
+    );
+    router.add(
         "/help",
         Rc::new(RefCell::new(Help::new(tomb_config.clone()))),
     );

@@ -10,13 +10,14 @@ use std::io;
 use tui::{
     backend::CrosstermBackend,
     layout::{Alignment, Constraint, Rect},
+    style::Color,
     text::Text,
     widgets::{Block, BorderType, Borders, Paragraph, Wrap},
     Frame, Terminal,
 };
 
 #[derive(Debug, Clone)]
-pub struct TextField {
+pub struct RGBColorField {
     pub title: Option<String>,
     pub value: String,
     pub id: String,
@@ -25,9 +26,15 @@ pub struct TextField {
     pub read_only: bool,
 }
 
-impl TextField {
-    pub fn new(id: &str, title: &str, value: String, read_only: bool, visible: bool) -> TextField {
-        TextField {
+impl RGBColorField {
+    pub fn new(
+        id: &str,
+        title: &str,
+        value: String,
+        read_only: bool,
+        visible: bool,
+    ) -> RGBColorField {
+        RGBColorField {
             id: String::from(id),
             title: Some(String::from(title)),
             value: value.clone(),
@@ -45,11 +52,18 @@ impl TextField {
     pub fn backspace(&mut self) {
         self.value.pop();
     }
+    pub fn to_color(&mut self) -> Color {
+        let color = self.value.clone();
+        match rgb_to_color(color.as_str()) {
+            Some(color) => color,
+            None => color_default(),
+        }
+    }
 }
 
-impl Component for TextField {
+impl Component for RGBColorField {
     fn name(&self) -> &str {
-        "TextField"
+        "RGBColorField"
     }
     fn id(&self) -> String {
         self.id.clone()
@@ -75,9 +89,9 @@ impl Component for TextField {
         let paragraph = Paragraph::new(text)
             .block(modal)
             .style(if self.focused {
-                paragraph_style().fg(color_light())
+                paragraph_style().fg(self.to_color())
             } else {
-                paragraph_style()
+                paragraph_style().fg(self.to_color())
             })
             .alignment(Alignment::Left)
             .wrap(Wrap { trim: false });
@@ -104,6 +118,7 @@ impl Component for TextField {
                 return Ok(Propagate);
             }
             KeyCode::Enter => {
+                self.write('\n');
                 return Ok(Propagate);
             }
             KeyCode::Char(c) => {
@@ -114,7 +129,7 @@ impl Component for TextField {
         }
     }
 }
-impl Focusable for TextField {
+impl Focusable for RGBColorField {
     fn tab_index(&self) -> usize {
         0
     }
@@ -129,7 +144,7 @@ impl Focusable for TextField {
     }
 }
 
-impl Field for TextField {
+impl Field for RGBColorField {
     fn get_id(&self) -> String {
         self.id.clone()
     }

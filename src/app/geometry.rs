@@ -37,3 +37,13 @@ pub fn body_sides(size: Rect) -> (Rect, Rect) {
     let right = chunks[1];
     (left, right)
 }
+
+pub fn horizontal_split(size: Rect) -> (Rect, Rect) {
+    let chunks = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
+        .split(size);
+    let left = chunks[0];
+    let right = chunks[1];
+    (left, right)
+}

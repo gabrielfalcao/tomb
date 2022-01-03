@@ -354,11 +354,15 @@ impl Component for Application<'_> {
                             "cannot delete: no secret selected"
                         ))),
                     },
-                    KeyCode::Char('a') => {
+                    KeyCode::Char('A') => {
                         context.borrow_mut().goto("/about");
                         Ok(Refresh)
                     }
-                    KeyCode::Char('h') | KeyCode::Char('?') => {
+                    KeyCode::Char('C') => {
+                        context.borrow_mut().goto("/config");
+                        Ok(Refresh)
+                    }
+                    KeyCode::Char('H') | KeyCode::Char('?') => {
                         context.borrow_mut().goto("/help");
                         Ok(Refresh)
                     }
@@ -426,7 +430,7 @@ impl Component for Application<'_> {
                         },
                         None => Ok(Propagate),
                     },
-                    _ => Ok(Propagate),
+                    _ => self.menu.process_keyboard(event, terminal, context, router),
                 }
             }
         }

@@ -140,7 +140,7 @@ impl Component for Form {
         event: KeyEvent,
         terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
         context: SharedContext,
-        _router: SharedRouter,
+        router: SharedRouter,
     ) -> Result<LoopEvent, Error> {
         match event.code {
             KeyCode::Esc => {
@@ -150,7 +150,20 @@ impl Component for Form {
             KeyCode::Tab => {
                 return Ok(Propagate);
             }
-            _ => Ok(Propagate),
+            // forward keyboard event to focused_field
+            _ => match self.focused_field() {
+                Some((title, field)) => {
+                    log_error(format!(
+                        "forwarding keyboard event {:?} to field {}",
+                        event, title,
+                    ));
+
+                    field
+                        .borrow_mut()
+                        .process_keyboard(event, terminal, context, router)
+                }
+                None => Ok(Propagate),
+            },
         }
     }
 }

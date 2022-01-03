@@ -1,5 +1,7 @@
 pub mod about;
 pub use about::*;
+pub mod config;
+pub use config::*;
 pub mod help;
 pub use help::*;
 pub mod delete_secret;
