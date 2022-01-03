@@ -53,7 +53,24 @@ fn load_key(matches: &ArgMatches) -> Key {
     let key_filename = matches.value_of("key_filename").unwrap_or("");
 
     if key_filename.len() > 0 {
-        Key::import(key_filename).unwrap()
+        match Key::import(key_filename) {
+            Ok(key) => key,
+            Err(err) => {
+                logger::err::error(format!(
+                    "{} {}",
+                    style("cannot import encryption key").color256(195),
+                    err
+                ));
+                logger::err::info(format!(
+                    "{}",
+                    style(
+                        "TIP: if this is your first time use Tomb, run 'tomb init' to generate a key based on password."
+                    )
+                    .color256(149),
+                ));
+                std::process::exit(1);
+            }
+        }
     } else if password.len() > 0 {
         Key::from_password(&password.as_bytes(), &config)
     } else {
