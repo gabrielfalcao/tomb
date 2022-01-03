@@ -11,7 +11,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install clipboard dependencies
-        run: sudo apt-get install -y libxcb-shape0-dev libxcb-xfixes0-dev
+        # https://github.com/aweinstock314/rust-clipboard/blob/07d080be58a361a5bbdb548fafe9449843d968be/README.md#prerequisites
+        run: sudo apt-get install -y xorg-dev
 
       - uses: actions-rs/toolchain@v1
         with:
