@@ -12,8 +12,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install clipboard dependencies
         # https://github.com/aweinstock314/rust-clipboard/blob/07d080be58a361a5bbdb548fafe9449843d968be/README.md#prerequisites
-        run: sudo apt-get install -y xorg-dev
-
+        run: sudo apt-get install -y libxcb-shape0-dev libxcb-xfixes0-dev
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
@@ -21,44 +20,34 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-      - name: cargo doc
+
+  e2e_test:
+    name: End-to-end Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install clipboard dependencies
+        # https://github.com/aweinstock314/rust-clipboard/blob/07d080be58a361a5bbdb548fafe9449843d968be/README.md#prerequisites
+        run: sudo apt-get install -y libxcb-shape0-dev libxcb-xfixes0-dev
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: e2e tests
+        run: make test
+
+  build_release:
+    name: Build Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install clipboard dependencies
+        # https://github.com/aweinstock314/rust-clipboard/blob/07d080be58a361a5bbdb548fafe9449843d968be/README.md#prerequisites
+        run: sudo apt-get install -y libxcb-shape0-dev libxcb-xfixes0-dev
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: build release
         uses: actions-rs/cargo@v1
         with:
-          command: doc
-
-  # e2e_test:
-  #   name: End-to-end Test
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - uses: actions-rs/toolchain@v1
-  #       with:
-  #         toolchain: stable
-  #     - name: e2e tests
-  #       run: make test
-
-  # load_test:
-  #   name: Load Test
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - uses: actions-rs/toolchain@v1
-  #       with:
-  #         toolchain: stable
-  #     - name: load tests
-  #       run: make load
-
-
-  # build_release:
-  #   name: Build Release
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - uses: actions-rs/toolchain@v1
-  #       with:
-  #         toolchain: stable
-  #     - name: build release
-  #       uses: actions-rs/cargo@v1
-  #       with:
-  #         command: test
-  #         args: --release --all-features
+          command: build
+          args: --release
