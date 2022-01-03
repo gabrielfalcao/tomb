@@ -16,6 +16,10 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+      - name: cargo build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
       - name: cargo test
         uses: actions-rs/cargo@v1
         with:
@@ -32,6 +36,10 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+      - name: cargo build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
       - name: e2e tests
         run: make test
 
