@@ -6,7 +6,7 @@ on:
 
 jobs:
   cargo_test:
-    name: Cargo
+    name: Test with Coverage
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -36,7 +36,7 @@ jobs:
           token: ${{secrets.CODECOV_TOKEN}}
 
   e2e_test:
-    name: End-to-end Test
+    name: End-to-End Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
