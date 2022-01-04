@@ -61,7 +61,6 @@ pub fn start(router: SharedRouter, tick_interval: u64) -> Result<(), SharedError
                     CEvent::Resize(_width, _height) => {}
                 }
             }
-
             if last_tick.elapsed() >= tick_rate {
                 if let Ok(_) = tx.send(Event::Tick) {
                     last_tick = Instant::now();
@@ -94,7 +93,7 @@ pub fn start(router: SharedRouter, tick_interval: u64) -> Result<(), SharedError
                     Ok(Propagate) => continue,
                     Ok(Prevent) => break Ok(()),
                     Ok(Refresh) => {
-                        // window.render(&mut terminal, context.clone(), router.clone())?;
+                        //window.render(&mut terminal, context.clone(), router.clone())?;
                     }
                     Err(err) => {
                         log(format!("{}", err));
@@ -107,7 +106,7 @@ pub fn start(router: SharedRouter, tick_interval: u64) -> Result<(), SharedError
             Event::Tick => {
                 match window.tick(&mut terminal, context.clone(), router.clone()) {
                     Ok(Refresh) => {
-                        window.render(&mut terminal, context.clone(), router.clone())?;
+                        //window.render(&mut terminal, context.clone(), router.clone())?;
                         continue;
                     }
                     Ok(Prevent | Propagate) => continue,

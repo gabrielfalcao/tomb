@@ -17,6 +17,8 @@ use tomb::{
     tomb::{default_tomb_filename, AES256Tomb},
 };
 
+const DEFAULT_TICK_INTERVAL: &'static str = "3145";
+
 pub fn confirm_password() -> Option<String> {
     let password = rpassword::prompt_password_stderr("Password: ").unwrap();
     let confirmation = rpassword::prompt_password_stderr("Confirm password: ").unwrap();
@@ -302,7 +304,9 @@ fn ui_command(matches: &ArgMatches) {
 
     let tomb_config = TombConfig::load();
     let aes_config = AesConfig::default().unwrap_or(AesConfig::builtin(None));
-    let tick_interval = matches.value_of("tick_interval").unwrap_or("3145");
+    let tick_interval = matches
+        .value_of("tick_interval")
+        .unwrap_or(DEFAULT_TICK_INTERVAL);
     let tick_interval = match tick_interval.parse::<u64>() {
         Ok(tick_interval) => tick_interval,
         Err(err) => {
@@ -467,7 +471,7 @@ fn main() {
                         .long("--tick-interval")
                         .help("the duration of each internal tick in milliseconds")
                         .short("T")
-                        .default_value("314")
+                        .default_value(DEFAULT_TICK_INTERVAL)
                         .required(false)
                         .takes_value(true),
                 )
