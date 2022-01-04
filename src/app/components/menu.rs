@@ -4,6 +4,7 @@ use super::super::ui;
 use crate::app::log_error;
 use crate::ironpunk::*;
 use crossterm::event::{KeyCode, KeyEvent};
+use route_recognizer::Router;
 use std::{collections::BTreeMap, io};
 use tui::{
     backend::CrosstermBackend,
@@ -30,11 +31,12 @@ impl MenuItem {
     }
 }
 
-#[derive(PartialEq, Clone)]
+#[derive(Clone)]
 pub struct Menu {
     pub cid: String,
     pub selected: Option<usize>,
     pub labels: Vec<String>,
+    pub router: Router<MenuItem>,
     pub items: BTreeMap<String, MenuItem>,
     pub error: Option<String>,
 }
@@ -45,6 +47,7 @@ impl Menu {
             selected: None,
             labels: Vec::new(),
             items: BTreeMap::new(),
+            router: Router::new(),
             error: None,
         }
     }
@@ -53,32 +56,38 @@ impl Menu {
         menu.add_item("Secrets", KeyCode::Char('S'), "/");
         menu.add_item("Help", KeyCode::Char('H'), "/help");
         menu.add_item("Configuration", KeyCode::Char('C'), "/config");
-
         menu.add_item("About", KeyCode::Char('A'), "/about");
-        menu.select(selected).unwrap_or(());
+
+        match menu.select(selected) {
+            Ok(_) => {}
+            Err(err) => {
+                log_error(format!("cannot select {:?}: {}", selected, err));
+            }
+        }
         menu
     }
     pub fn index_of(&self, item: &str) -> Result<usize, Error> {
-        match self
-            .labels
-            .iter()
-            .position(|i| i.clone() == String::from(item))
-        {
+        match self.labels.iter().position(|i| i.clone().eq(item)) {
             Some(pos) => Ok(pos),
             None => Err(Error::with_message(format!("invalid menu item: {}", item))),
         }
     }
 
     pub fn select_by_location(&mut self, location: String) {
-        // log_error(format!("select_by_location({:?})", location));
-        for (_, item) in &self.items {
-            if item.route_path.eq(&location) {
-                let index = match self.index_of(&item.label) {
+        match self.router.recognize(&location) {
+            Ok(item) => {
+                let label = item.handler().label.clone();
+                let index = match self.index_of(&label) {
                     Ok(index) => index,
-                    Err(_) => 0,
+                    Err(err) => {
+                        log_error(format!("cannot select by location {:?}: {}", location, err));
+                        0
+                    }
                 };
                 self.selected = Some(index);
-                return;
+            }
+            Err(error) => {
+                log_error(format!("failed to select menu by location: {}", error));
             }
         }
     }
@@ -89,19 +98,14 @@ impl Menu {
         }
     }
     pub fn current(&self) -> Option<MenuItem> {
-        match self.current_label() {
-            Some(label) => match self.items.get(&label) {
-                Some(item) => Some(item.clone()),
-                None => None,
-            },
+        let label = self.current_label();
+        match self.items.get(&label) {
+            Some(item) => Some(item.clone()),
             None => None,
         }
     }
-    pub fn current_label(&self) -> Option<String> {
-        match self.selected {
-            Some(selected) => Some(self.labels[selected].clone()),
-            None => None,
-        }
+    pub fn current_label(&self) -> String {
+        self.labels[self.selected_index()].clone()
     }
 
     pub fn set_index(&mut self, index: usize) {
@@ -118,11 +122,14 @@ impl Menu {
         }
     }
     pub fn next(&mut self) {
+        let count = self.labels.len();
+        // log_error(format!(
+        //     "Menu.next (before) [selected={:?}] [count={:?}] ",
+        //     self.selected, count
+        // ));
         match self.selected {
             Some(selected) => {
-                if selected < self.labels.len() - 1 {
-                    self.selected = Some(selected + 1);
-                }
+                self.selected = Some((selected + 1) % count);
             }
             None => {
                 if self.labels.len() > 0 {
@@ -130,12 +137,24 @@ impl Menu {
                 }
             }
         }
+        log_error(format!(
+            "Menu.next (after) [selected={:?}] [count={:?}] ",
+            self.selected, count
+        ));
     }
     pub fn previous(&mut self) {
+        let count = self.labels.len();
+        // log_error(format!(
+        //     "Menu.previous (before) [selected={:?}] [count={:?}] ",
+        //     self.selected, count
+        // ));
         match self.selected {
             Some(selected) => {
                 if selected > 0 {
                     self.selected = Some(selected - 1);
+                } else {
+                    let last = count - 1;
+                    self.selected = Some(last);
                 }
             }
             None => {
@@ -145,12 +164,17 @@ impl Menu {
                 }
             }
         }
+        log_error(format!(
+            "Menu.previous (after) [selected={:?}] [count={:?}] ",
+            self.selected, count
+        ));
     }
     pub fn add_item(&mut self, title: &str, code: KeyCode, route_path: &str) {
         let label = String::from(title);
         let item = MenuItem::new(label.clone(), code, String::from(route_path));
         self.labels.push(label.clone());
-        self.items.insert(label, item);
+        self.items.insert(label, item.clone());
+        self.router.add(route_path, item);
         if self.selected == None {
             self.selected = Some(0)
         }
@@ -218,7 +242,6 @@ impl Component for Menu {
                 self.next();
                 return match self.current() {
                     Some(selected) => {
-                        self.select_by_location(selected.route_path.clone());
                         context.borrow_mut().goto(&selected.route_path);
                         return Ok(Refresh);
                     }
@@ -229,7 +252,6 @@ impl Component for Menu {
                 self.previous();
                 return match self.current() {
                     Some(selected) => {
-                        self.select_by_location(selected.route_path.clone());
                         context.borrow_mut().goto(&selected.route_path);
                         return Ok(Refresh);
                     }
@@ -245,7 +267,7 @@ impl Component for Menu {
                     return Ok(Refresh);
                 }
 
-                for (label, item) in &self.items {
+                for (label, item) in self.items.iter() {
                     let label = label.clone();
                     if item.code == code {
                         match self.select(&label) {

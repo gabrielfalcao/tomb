@@ -42,6 +42,15 @@ impl Component for About<'_> {
     fn name(&self) -> &str {
         COMPONENT_NAME
     }
+    fn tick(
+        &mut self,
+        terminal: &mut Terminal<Backend>,
+        context: SharedContext,
+        router: SharedRouter,
+    ) -> Result<LoopEvent, Error> {
+        self.menu.tick(terminal, context, router)
+    }
+
     fn id(&self) -> String {
         String::from(COMPONENT_NAME)
     }

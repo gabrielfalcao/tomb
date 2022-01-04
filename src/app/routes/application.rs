@@ -240,7 +240,7 @@ impl Component for Application<'_> {
         context: SharedContext,
         router: SharedRouter,
     ) -> Result<LoopEvent, Error> {
-        Ok(Propagate)
+        self.menu.tick(terminal, context, router)
     }
 
     fn process_keyboard(

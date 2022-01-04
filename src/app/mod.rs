@@ -27,24 +27,17 @@ pub fn start(
 ) -> Result<(), ironpunk::SharedError> {
     let mut router = ironpunk::SharedRouter::new();
 
-    let app = Rc::new(RefCell::new(Application::new(
-        key.clone(),
-        tomb.clone(),
-        tomb_config.clone(),
-        aes_config.clone(),
-    )));
-
     router.add(
-        "/about",
-        Rc::new(RefCell::new(About::new(tomb_config.clone()))),
+        "/help",
+        Rc::new(RefCell::new(Help::new(tomb_config.clone()))),
     );
     router.add(
         "/config",
         Rc::new(RefCell::new(Configuration::new(tomb_config.clone()))),
     );
     router.add(
-        "/help",
-        Rc::new(RefCell::new(Help::new(tomb_config.clone()))),
+        "/about",
+        Rc::new(RefCell::new(About::new(tomb_config.clone()))),
     );
     router.add(
         "/delete/:key",
@@ -63,7 +56,14 @@ pub fn start(
             tomb_config.clone(),
         ))),
     );
-    router.add("/:filter", app.clone());
-    router.add("/", app);
+    router.add(
+        "/",
+        Rc::new(RefCell::new(Application::new(
+            key.clone(),
+            tomb.clone(),
+            tomb_config.clone(),
+            aes_config.clone(),
+        ))),
+    );
     ironpunk::start(router, tick_interval)
 }

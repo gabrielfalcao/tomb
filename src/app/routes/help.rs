@@ -47,6 +47,15 @@ impl Component for Help<'_> {
     fn id(&self) -> String {
         String::from(COMPONENT_NAME)
     }
+    fn tick(
+        &mut self,
+        terminal: &mut Terminal<Backend>,
+        context: SharedContext,
+        router: SharedRouter,
+    ) -> Result<LoopEvent, Error> {
+        self.menu.tick(terminal, context, router)
+    }
+
     fn render_in_parent(
         &mut self,
         rect: &mut Frame<CrosstermBackend<io::Stdout>>,
