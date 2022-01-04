@@ -31,7 +31,7 @@ use tui::{
     Terminal,
 };
 
-const DEFAULT_STATUS: &'static str = "press 'f' to filter / '?' for more help";
+const DEFAULT_STATUS: &'static str = "press '/' to filter or '?' for more help";
 
 #[derive(Eq, PartialEq, Clone)]
 pub enum FocusedComponent {
@@ -382,7 +382,7 @@ impl Component for Application<'_> {
                         context.borrow_mut().goto("/");
                         Ok(Refresh)
                     }
-                    KeyCode::Char('f') => {
+                    KeyCode::Char('f') | KeyCode::Char('/') => {
                         self.show_search();
                         Ok(Refresh)
                     }
