@@ -168,10 +168,29 @@ fn init_command(matches: &ArgMatches) {
 fn save_command(matches: &ArgMatches) {
     let path = matches.value_of("path").expect("missing key path");
     let value = matches.value_of("value").expect("missing value");
+    let url = match matches.value_of("url") {
+        Some(url) => Some(String::from(url)),
+        None => None,
+    };
+    let notes = match matches.value_of("notes") {
+        Some(notes) => Some(String::from(notes)),
+        None => None,
+    };
+    let username = match matches.value_of("username") {
+        Some(username) => Some(String::from(username)),
+        None => None,
+    };
     let key = load_key(matches);
     let mut tomb = load_tomb(matches);
     match tomb.add_secret(path, String::from(value), key) {
-        Ok(_) => {
+        Ok(mut secret) => {
+            tomb.upsert_secret(
+                secret
+                    .with_notes(notes)
+                    .with_url(url)
+                    .with_username(username),
+            );
+
             match tomb.save() {
                 Ok(_) => {
                     logger::out::ok(format!("added secret: {}", path));
@@ -334,6 +353,30 @@ fn main() {
                         .value_name("FILENAME")
                         .default_value(&tomb_filename)
                         .help("the path to the tomb file containing the encrypted secrets")
+                        .takes_value(true),
+                )
+                .arg(
+                    Arg::with_name("url")
+                        .long("url")
+                        .short("U")
+                        .value_name("URL")
+                        .help("attach a URL to this secret, for example a login url")
+                        .takes_value(true),
+                )
+                .arg(
+                    Arg::with_name("notes")
+                        .long("notes")
+                        .short("N")
+                        .value_name("NOTES")
+                        .help("attach a text to this secret, stored as plaintext")
+                        .takes_value(true),
+                )
+                .arg(
+                    Arg::with_name("username")
+                        .long("username")
+                        .short("u")
+                        .value_name("USERNAME")
+                        .help("attach a text to this secret, stored as plaintext")
                         .takes_value(true),
                 )
                 .arg(

@@ -149,6 +149,26 @@ impl<'a> SecretDetails<'a> {
             true,
             true,
         );
+        let field_username = TextField::new(
+            "username",
+            "username",
+            match secret.username {
+                Some(username) => username.clone(),
+                None => String::from("<none>"),
+            },
+            true,
+            true,
+        );
+        let field_url = TextField::new(
+            "url",
+            "url",
+            match secret.url {
+                Some(url) => url.clone(),
+                None => String::from("<none>"),
+            },
+            true,
+            true,
+        );
         let field_updated_at = TextField::new(
             "updated-at",
             "updated-at",
@@ -160,6 +180,8 @@ impl<'a> SecretDetails<'a> {
         self.form.add_field(field_name);
         self.form.add_field(field_group);
         self.form.add_field(field_secret);
+        self.form.add_field(field_username);
+        self.form.add_field(field_url);
         self.form.add_field(field_updated_at);
         self.form.add_field(field_digest);
         self.form.add_field(field_notes);
