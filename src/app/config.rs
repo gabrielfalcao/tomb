@@ -109,6 +109,9 @@ impl TombConfig {
     pub fn load() -> TombConfig {
         TombConfig::default().unwrap_or(TombConfig::builtin())
     }
+    pub fn set_colors(&mut self, colors: ColorTheme) {
+        self.colors = colors.clone();
+    }
     pub fn save(&mut self) -> Result<(), Error> {
         let filename = default_tomb_config_filename();
         match self.export(&filename) {

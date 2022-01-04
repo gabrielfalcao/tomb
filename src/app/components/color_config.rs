@@ -15,6 +15,7 @@ use std::{io, marker::PhantomData};
 use tui::{
     backend::CrosstermBackend,
     layout::Alignment,
+    style::Style,
     widgets::{Block, BorderType, Borders, Paragraph},
     Terminal,
 };
@@ -24,6 +25,7 @@ use tui::{
 pub struct ColorThemeConfiguration<'a> {
     tomb_config: TombConfig,
     form: Form,
+    focused: bool,
     phantom: PhantomData<&'a Option<()>>,
 }
 
@@ -93,8 +95,46 @@ impl<'a> ColorThemeConfiguration<'a> {
         ColorThemeConfiguration {
             tomb_config,
             form,
+            focused: false,
             phantom: PhantomData,
         }
+    }
+    pub fn border_style(&self) -> Color {
+        match self.focused {
+            true => ui::color_light(),
+            false => ui::color_default(),
+        }
+    }
+    pub fn get_color_theme(&self) -> ColorTheme {
+        let mut result = ColorTheme::builtin();
+        for field in self.form.fields.iter() {
+            let id = field.borrow_mut().get_id();
+            match id.as_str() {
+                "color_default" => {
+                    result.default = field.borrow_mut().get_value();
+                }
+                "color_light" => {
+                    result.light = field.borrow_mut().get_value();
+                }
+                "color_default_fg" => {
+                    result.default_fg = field.borrow_mut().get_value();
+                }
+                "color_default_bg" => {
+                    result.default_bg = field.borrow_mut().get_value();
+                }
+                "color_error_fg" => {
+                    result.error_fg = field.borrow_mut().get_value();
+                }
+                "color_error_bg" => {
+                    result.error_bg = field.borrow_mut().get_value();
+                }
+                "color_blurred" => {
+                    result.blurred = field.borrow_mut().get_value();
+                }
+                _ => {}
+            }
+        }
+        result
     }
 }
 
@@ -112,7 +152,7 @@ impl Component for ColorThemeConfiguration<'_> {
     ) -> Result<(), Error> {
         let modal = Block::default()
             .borders(Borders::ALL)
-            .style(ui::block_style().fg(ui::color_default_fg()))
+            .style(ui::block_style().fg(self.border_style()))
             .border_type(BorderType::Thick)
             .title(String::from("UI Colors"));
 
@@ -142,3 +182,19 @@ impl Component for ColorThemeConfiguration<'_> {
     }
 }
 impl Route for ColorThemeConfiguration<'_> {}
+impl Focusable for ColorThemeConfiguration<'_> {
+    fn tab_index(&self) -> usize {
+        1
+    }
+
+    fn is_focused(&self) -> bool {
+        self.focused
+    }
+    fn focus(&mut self) {
+        self.focused = true;
+    }
+    fn blur(&mut self) {
+        self.form.blur();
+        self.focused = false;
+    }
+}

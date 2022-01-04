@@ -92,11 +92,11 @@ impl Component for TextField {
         match event.code {
             KeyCode::Backspace => {
                 self.backspace();
-                Ok(Propagate)
+                Ok(Refresh)
             }
             KeyCode::Esc => {
                 self.blur();
-                return Ok(Propagate);
+                return Ok(Refresh);
             }
             KeyCode::Enter => {
                 return Ok(Propagate);

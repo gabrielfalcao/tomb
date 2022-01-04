@@ -92,6 +92,7 @@ impl Form {
         }
         self.selected_index = None;
     }
+
     pub fn field_constraints(&self) -> Vec<Constraint> {
         let mut result = Vec::new();
         for field in self.fields.iter() {

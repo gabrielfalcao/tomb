@@ -260,7 +260,7 @@ impl Component for Menu {
                 };
             }
             code => {
-                if code == KeyCode::Char('q') {
+                if event.modifiers == KeyModifiers::CONTROL && code == KeyCode::Char('q') {
                     return Ok(Quit);
                 }
                 if code == KeyCode::Esc {

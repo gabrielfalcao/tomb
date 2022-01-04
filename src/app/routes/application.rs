@@ -128,11 +128,6 @@ impl<'a> Application<'a> {
         }
     }
     pub fn render_secret_list(&mut self) -> Result<List<'a>, Error> {
-        match self.tomb.reload() {
-            // load latest version from disk
-            Ok(_) => {}
-            Err(e) => return Err(Error::with_message(format!("{}", e))),
-        };
         let secrets = Block::default()
             .borders(Borders::ALL)
             .style(ui::default_style().fg(ui::color_blurred()))
@@ -225,6 +220,13 @@ impl<'a> Application<'a> {
             }
         }
         self.log_visibility();
+        match self.tomb.reload() {
+            // load latest version from disk
+            Ok(_) => {}
+            Err(e) => {
+                log_error(format!("{}", e));
+            }
+        };
     }
 }
 
