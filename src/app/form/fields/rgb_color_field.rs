@@ -96,7 +96,10 @@ impl Component for RGBColorField {
                 Some(color) => color,
                 None => color_default_bg(),
             })
-            .fg(color_default_bg());
+            .fg(match self.to_color() {
+                Some(_) => color_default_bg(),
+                None => color_default_fg(),
+            });
         let color = Paragraph::new(match self.to_color() {
             Some(color) => String::new(),
             None => format!("invalid rgb hex"),
@@ -137,8 +140,12 @@ impl Component for RGBColorField {
                 return Ok(Refresh);
             }
             KeyCode::Char(c) => {
-                self.write(c);
-                Ok(Refresh)
+                if c.is_ascii_hexdigit() && self.get_value().len() <= 7 {
+                    self.write(c);
+                    Ok(Refresh)
+                } else {
+                    Ok(Propagate)
+                }
             }
             _ => Ok(Propagate),
         }
@@ -161,10 +168,14 @@ impl Focusable for RGBColorField {
 
 impl Field for RGBColorField {
     fn write(&mut self, c: char) {
-        self.value.push(c);
+        if !self.read_only {
+            self.value.push(c);
+        }
     }
     fn backspace(&mut self) {
-        self.value.pop();
+        if !self.read_only {
+            self.value.pop();
+        }
     }
     fn get_id(&self) -> String {
         self.id.clone()

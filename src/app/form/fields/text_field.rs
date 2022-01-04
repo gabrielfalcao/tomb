@@ -126,10 +126,14 @@ impl Focusable for TextField {
 
 impl Field for TextField {
     fn write(&mut self, c: char) {
-        self.value.push(c);
+        if !self.read_only {
+            self.value.push(c);
+        }
     }
     fn backspace(&mut self) {
-        self.value.pop();
+        if !self.read_only {
+            self.value.pop();
+        }
     }
     fn get_id(&self) -> String {
         self.id.clone()
