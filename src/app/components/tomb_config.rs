@@ -37,21 +37,21 @@ pub fn create_fields(config: TombConfig) -> Vec<SharedField> {
         "key_filename",
         "key_filename",
         config.key_filename.clone(),
-        false,
+        true,
         true,
     );
     let field_tomb_filename = TextField::new(
         "tomb_filename",
         "tomb_filename",
         config.tomb_filename.clone(),
-        false,
+        true,
         true,
     );
     let field_log_filename = TextField::new(
         "log_filename",
         "log_filename",
         config.log_filename.clone(),
-        false,
+        true,
         true,
     );
     fields.push(Rc::new(RefCell::new(field_key_filename)));
