@@ -1,6 +1,6 @@
 #![allow(unused_imports)]
 #![allow(unused_variables)]
-use super::super::components::{ColorThemeConfiguration, Menu};
+use super::super::components::{ColorThemeConfiguration, SharedMenu};
 use super::super::geometry::*;
 use super::super::ui;
 
@@ -23,18 +23,18 @@ use tui::{
 pub struct Configuration<'a> {
     tomb_config: TombConfig,
     color_config: ColorThemeConfiguration<'a>,
-    menu: Menu,
+    menu: SharedMenu,
     phantom: PhantomData<&'a Option<()>>,
 }
 
 impl<'a> Configuration<'a> {
-    pub fn new(tomb_config: TombConfig) -> Configuration<'a> {
+    pub fn new(menu: SharedMenu, tomb_config: TombConfig) -> Configuration<'a> {
         let color_config = ColorThemeConfiguration::new(tomb_config.clone());
 
         Configuration {
             tomb_config,
+            menu,
             color_config,
-            menu: Menu::default("Configuration"),
             phantom: PhantomData,
         }
     }
@@ -53,7 +53,9 @@ impl Component for Configuration<'_> {
         context: SharedContext,
         router: SharedRouter,
     ) -> Result<LoopEvent, Error> {
-        self.menu.tick(terminal, context.clone(), router.clone())?;
+        self.menu
+            .borrow_mut()
+            .tick(terminal, context.clone(), router.clone())?;
         self.color_config.tick(terminal, context, router)
     }
 
@@ -63,8 +65,8 @@ impl Component for Configuration<'_> {
         chunk: Rect,
     ) -> Result<(), Error> {
         let (header, chunk, footer) = vertical_stack(chunk);
-        self.menu.render_in_parent(rect, header)?;
-        self.menu.render_in_parent(rect, footer)?;
+        self.menu.borrow_mut().render_in_parent(rect, header)?;
+        self.menu.borrow_mut().render_in_parent(rect, footer)?;
         let (left, right) = horizontal_split(chunk);
         self.color_config.render_in_parent(rect, right)
     }
@@ -77,10 +79,12 @@ impl Component for Configuration<'_> {
         context: SharedContext,
         router: SharedRouter,
     ) -> Result<LoopEvent, Error> {
-        match self
-            .menu
-            .process_keyboard(event, terminal, context.clone(), router.clone())
-        {
+        match self.menu.borrow_mut().process_keyboard(
+            event,
+            terminal,
+            context.clone(),
+            router.clone(),
+        ) {
             Ok(Propagate) => self
                 .color_config
                 .process_keyboard(event, terminal, context, router),

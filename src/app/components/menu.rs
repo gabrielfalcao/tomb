@@ -21,6 +21,7 @@ pub struct MenuItem {
     pub route_path: String,
     pub code: KeyCode,
 }
+pub type SharedMenu = Rc<RefCell<Menu>>;
 impl MenuItem {
     pub fn new(label: String, code: KeyCode, route_path: String) -> MenuItem {
         MenuItem {
@@ -51,17 +52,17 @@ impl Menu {
             error: None,
         }
     }
-    pub fn default(selected: &str) -> Menu {
+    pub fn default() -> Menu {
         let mut menu = Menu::empty();
         menu.add_item("Secrets", KeyCode::Char('S'), "/");
         menu.add_item("Help", KeyCode::Char('H'), "/help");
         menu.add_item("Configuration", KeyCode::Char('C'), "/config");
         menu.add_item("About", KeyCode::Char('A'), "/about");
 
-        match menu.select(selected) {
+        match menu.select("Secrets") {
             Ok(_) => {}
             Err(err) => {
-                log_error(format!("cannot select {:?}: {}", selected, err));
+                log_error(format!("cannot select Secrets menu: {}", err));
             }
         }
         menu

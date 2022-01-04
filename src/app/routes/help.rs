@@ -2,7 +2,7 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
-use super::super::components::menu::Menu;
+use super::super::components::menu::SharedMenu;
 use super::super::geometry::*;
 use super::super::ui;
 
@@ -26,15 +26,15 @@ const COMPONENT_NAME: &'static str = "Help";
 #[derive(Clone)]
 pub struct Help<'a> {
     tomb_config: TombConfig,
-    menu: Menu,
+    menu: SharedMenu,
     phantom: PhantomData<&'a Option<()>>,
 }
 
 impl<'a> Help<'a> {
-    pub fn new(tomb_config: TombConfig) -> Help<'a> {
+    pub fn new(menu: SharedMenu, tomb_config: TombConfig) -> Help<'a> {
         Help {
             tomb_config,
-            menu: Menu::default(COMPONENT_NAME),
+            menu,
             phantom: PhantomData,
         }
     }
@@ -53,7 +53,7 @@ impl Component for Help<'_> {
         context: SharedContext,
         router: SharedRouter,
     ) -> Result<LoopEvent, Error> {
-        self.menu.tick(terminal, context, router)
+        self.menu.borrow_mut().tick(terminal, context, router)
     }
 
     fn render_in_parent(
@@ -62,8 +62,8 @@ impl Component for Help<'_> {
         chunk: Rect,
     ) -> Result<(), Error> {
         let (header, chunk, footer) = vertical_stack(chunk);
-        self.menu.render_in_parent(rect, header)?;
-        self.menu.render_in_parent(rect, footer)?;
+        self.menu.borrow_mut().render_in_parent(rect, header)?;
+        self.menu.borrow_mut().render_in_parent(rect, footer)?;
 
         let block = Block::default()
             .borders(Borders::ALL)
@@ -109,7 +109,9 @@ Keyboard Shortcuts:
         context: SharedContext,
         router: SharedRouter,
     ) -> Result<LoopEvent, Error> {
-        self.menu.process_keyboard(event, terminal, context, router)
+        self.menu
+            .borrow_mut()
+            .process_keyboard(event, terminal, context, router)
     }
 }
 impl Route for Help<'_> {}

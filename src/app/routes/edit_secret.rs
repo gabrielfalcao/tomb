@@ -1,4 +1,3 @@
-use super::super::components::menu::Menu;
 use super::super::geometry::*;
 use super::super::ui;
 use super::super::{AES256Tomb, TombConfig};
@@ -48,14 +47,8 @@ impl Component for EditSecret<'_> {
         rect: &mut Frame<CrosstermBackend<io::Stdout>>,
         chunk: Rect,
     ) -> Result<(), Error> {
-        let (header, chunk, footer) = vertical_stack(chunk);
+        let (_header, chunk, _footer) = vertical_stack(chunk);
 
-        Menu::default("EditSecret")
-            .render_in_parent(rect, header)
-            .unwrap();
-        Menu::default("EditSecret")
-            .render_in_parent(rect, footer)
-            .unwrap();
         let block = Block::default()
             .borders(Borders::ALL)
             .style(ui::default_style().fg(ui::color_default()))

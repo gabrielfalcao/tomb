@@ -1,7 +1,7 @@
 #![allow(unused_imports)]
 #![allow(unused_variables)]
 
-use super::super::components::menu::Menu;
+use super::super::components::menu::SharedMenu;
 use super::super::geometry::*;
 use super::super::ui;
 
@@ -24,15 +24,15 @@ const COMPONENT_NAME: &'static str = "About";
 #[derive(Clone)]
 pub struct About<'a> {
     tomb_config: TombConfig,
-    menu: Menu,
+    menu: SharedMenu,
     phantom: PhantomData<&'a Option<()>>,
 }
 
 impl<'a> About<'a> {
-    pub fn new(tomb_config: TombConfig) -> About<'a> {
+    pub fn new(menu: SharedMenu, tomb_config: TombConfig) -> About<'a> {
         About {
+            menu,
             tomb_config,
-            menu: Menu::default(COMPONENT_NAME),
             phantom: PhantomData,
         }
     }
@@ -48,7 +48,7 @@ impl Component for About<'_> {
         context: SharedContext,
         router: SharedRouter,
     ) -> Result<LoopEvent, Error> {
-        self.menu.tick(terminal, context, router)
+        self.menu.borrow_mut().tick(terminal, context, router)
     }
 
     fn id(&self) -> String {
@@ -61,8 +61,8 @@ impl Component for About<'_> {
     ) -> Result<(), Error> {
         let (header, chunk, footer) = vertical_stack(chunk);
 
-        self.menu.render_in_parent(rect, header)?;
-        self.menu.render_in_parent(rect, footer)?;
+        self.menu.borrow_mut().render_in_parent(rect, header)?;
+        self.menu.borrow_mut().render_in_parent(rect, footer)?;
         let version = format!("Version {}", version());
         let block = Block::default()
             .borders(Borders::ALL)
@@ -128,7 +128,9 @@ impl Component for About<'_> {
         context: SharedContext,
         router: SharedRouter,
     ) -> Result<LoopEvent, Error> {
-        self.menu.process_keyboard(event, terminal, context, router)
+        self.menu
+            .borrow_mut()
+            .process_keyboard(event, terminal, context, router)
     }
 }
 impl Route for About<'_> {}

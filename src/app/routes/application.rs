@@ -2,7 +2,7 @@
 #![allow(dead_code)]
 
 pub use super::super::components::{
-    menu::Menu, modal::Modal, searchbox::SearchBox, secret_details::SecretDetails,
+    menu::SharedMenu, modal::Modal, searchbox::SearchBox, secret_details::SecretDetails,
 };
 use super::super::geometry::*;
 use super::super::log_error;
@@ -52,7 +52,7 @@ pub struct Application<'a> {
     pub error: Option<String>,
     pub visible: bool,
     pub pin_visible: bool,
-    pub menu: Menu,
+    pub menu: SharedMenu,
     pub searchbox: SearchBox,
     pub details: SecretDetails<'a>,
     pub scroll: u16,
@@ -61,6 +61,7 @@ pub struct Application<'a> {
 
 impl<'a> Application<'a> {
     pub fn new(
+        menu: SharedMenu,
         key: Key,
         tomb: AES256Tomb,
         tomb_config: TombConfig,
@@ -72,10 +73,10 @@ impl<'a> Application<'a> {
         Application {
             key,
             tomb,
+            menu,
             aes_config,
             details,
             tomb_config,
-            menu: Menu::default("Secrets"),
             searchbox: SearchBox::new("*"),
             started_at: Utc::now(),
             text: String::from("Up/Down browse secrets / '?' show help"),
@@ -240,7 +241,7 @@ impl Component for Application<'_> {
         context: SharedContext,
         router: SharedRouter,
     ) -> Result<LoopEvent, Error> {
-        self.menu.tick(terminal, context, router)
+        self.menu.borrow_mut().tick(terminal, context, router)
     }
 
     fn process_keyboard(
@@ -329,8 +330,17 @@ impl Component for Application<'_> {
                         result => return result,
                     }
                 }
-                self.menu
-                    .process_keyboard(event, terminal, context.clone(), router.clone())?;
+                match self.menu.borrow_mut().process_keyboard(
+                    event,
+                    terminal,
+                    context.clone(),
+                    router.clone(),
+                ) {
+                    Ok(Refresh) => return Ok(Refresh),
+                    Err(error) => return Err(error),
+                    _ => {}
+                }
+
                 match code {
                     KeyCode::Tab => {
                         match self.items.current() {
@@ -430,7 +440,10 @@ impl Component for Application<'_> {
                         },
                         None => Ok(Propagate),
                     },
-                    _ => self.menu.process_keyboard(event, terminal, context, router),
+                    _ => self
+                        .menu
+                        .borrow_mut()
+                        .process_keyboard(event, terminal, context, router),
                 }
             }
         }
@@ -489,8 +502,8 @@ impl Route for Application<'_> {
             };
             let status_bar = status_paragraph(&footer_title, &footer_label);
             // select menu item based on current route
-            self.menu.select_by_location(location);
-            self.menu.render_in_parent(rect, top).unwrap();
+            self.menu.borrow_mut().select_by_location(location);
+            self.menu.borrow_mut().render_in_parent(rect, top).unwrap();
             if self.search_visible() {
                 self.searchbox.render_in_parent(rect, top_right).unwrap();
             }
