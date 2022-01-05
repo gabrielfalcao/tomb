@@ -317,13 +317,14 @@ impl AES256Tomb {
     ) -> Result<AES256Secret, Error> {
         self.add_secret_from_bytes(path, Vec::from(plaintext), key)
     }
+
     pub fn add_secret_from_bytes(
         &mut self,
         path: &str,
         plaintext: Vec<u8>,
         key: Key,
     ) -> Result<AES256Secret, Error> {
-        let cyphertext = match key.encrypt(&plaintext) {
+        let ciphertext = match key.encrypt(&plaintext) {
             Ok(cypher) => cypher,
             Err(error) => {
                 return Err(Error::with_message(format!(
@@ -333,12 +334,13 @@ impl AES256Tomb {
                 )));
             }
         };
-        let secret = AES256Secret::new(String::from(path), cyphertext, key);
+        let secret = AES256Secret::new(String::from(path), ciphertext, key);
         self.data.insert(secret.key(), secret.clone());
         Ok(secret.clone())
     }
+
     pub fn derive_key(&self, password: &str) -> Key {
-        Key::from_password(password.as_bytes(), &self.config)
+        Key::from_password(password, &self.config)
     }
 
     pub fn get(&self, path: &str) -> Result<AES256Secret, Error> {
@@ -382,8 +384,8 @@ mod tests {
 
     fn generate_key() -> (Key, AesConfig) {
         let config = AesConfig::builtin(None);
-        let password = String::from("123456");
-        (Key::from_password(&password.as_bytes(), &config), config)
+        let password = "123456";
+        (Key::from_password(password, &config), config)
     }
     #[test]
     fn test_create_tomb_and_manage_secrets() {

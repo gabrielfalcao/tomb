@@ -72,7 +72,7 @@ fn load_key(matches: &ArgMatches) -> Key {
             }
         }
     } else if password.len() > 0 {
-        Key::from_password(&password.as_bytes(), &config)
+        Key::from_password(&password, &config)
     } else {
         logger::err::error(format!(
             "{}{}{}{}{}",
@@ -132,7 +132,7 @@ fn init_command(matches: &ArgMatches) {
             String::from(matches.value_of("password").unwrap_or(""))
         };
         logger::err::info(format!("deriving key from password, please be patient..."));
-        let key = Key::from_password(&password.as_bytes(), &custom_config);
+        let key = Key::from_password(&password, &custom_config);
 
         let key_path = match key.export(key_filename) {
             Ok(path) => path,
