@@ -84,31 +84,6 @@ impl fmt::Display for IoErrorKind {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_print_error() {
-        let filename = "blob.txt";
-        let error = IoError {
-            source: None,
-            kind: IoErrorKind::FailedToOpenFile {
-                filename: filename.into(),
-            },
-        };
-
-        assert_eq!(
-            format!("{}", error),
-            format!(
-                "{}{}",
-                style("cannot open file ").color256(colors::ERR_MSG),
-                style(filename).color256(colors::ERR_VAR)
-            )
-        )
-    }
-}
-
 #[derive(Debug, Clone)]
 pub struct TombError {
     pub message: String,
@@ -358,4 +333,29 @@ pub fn get_cwd() -> Result<String, TombError> {
                 style("failed convert cwd path to string").color256(colors::ERR_HLT),
             ))
         })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_print_error() {
+        let filename = "blob.txt";
+        let error = IoError {
+            source: None,
+            kind: IoErrorKind::FailedToOpenFile {
+                filename: filename.into(),
+            },
+        };
+
+        assert_eq!(
+            format!("{}", error),
+            format!(
+                "{}{}",
+                style("cannot open file ").color256(colors::ERR_MSG),
+                style(filename).color256(colors::ERR_VAR)
+            )
+        )
+    }
 }

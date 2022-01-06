@@ -19,7 +19,7 @@ use tomb::aes256cbc::{Key, Config};
 let config = Config::from_vec(&[100, 200, 300]);
 
 let password = String::from("I <3 Nickelback");
-let key = Key::from_password(&password.as_bytes(), &config);
+let key = Key::from_password(&password, &config);
 
 let plaintext = b"Some secret information";
 let cyphertext = key.encrypt(plaintext).ok().expect("encryption failed");
