@@ -54,8 +54,8 @@ use std::borrow::Borrow;
 use std::io::Read;
 use std::{fmt, fs::File};
 
-const ALGO: &'static str = "aes-256-cbc";
-const DIGEST_SIZE: usize = 32;
+pub const ALGO: &'static str = "aes-256-cbc";
+pub const DIGEST_SIZE: usize = 32;
 
 ///The path used by `Key::default()` and `Config::default()`
 pub const TOMB_KEY: &'static str = "~/.tomb.key";
@@ -74,9 +74,9 @@ pub const SALT_CYCLES: u32 = 16000;
 ///The builtin number of cycles for a iv derivation
 pub const IV_CYCLES: u32 = 16000;
 
-const KEY_SIZE: usize = 256;
-const IV_SIZE: usize = 16;
-const BLOCK_SIZE: usize = 4096;
+pub const KEY_SIZE: usize = 256;
+pub const IV_SIZE: usize = 16;
+pub const BLOCK_SIZE: usize = 4096;
 
 pub type Digest = [u8; DIGEST_SIZE];
 

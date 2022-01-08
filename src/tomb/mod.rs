@@ -1,5 +1,5 @@
 pub mod logging;
-use crate::aes256cbc::{Config as AesConfig, Digest, Key};
+use crate::aes256cbc::{Config as AesConfig, Digest, Key, DIGEST_SIZE};
 
 use crate::core::version;
 use crate::{
@@ -70,6 +70,19 @@ pub struct AES256Secret {
     pub updated_at: DateTime<Utc>,
 }
 impl AES256Secret {
+    pub fn empty() -> AES256Secret {
+        AES256Secret {
+            digest: [0; DIGEST_SIZE],
+            path: String::new(),
+            value: String::new(),
+            notes: None,
+            url: None,
+            username: None,
+            attributes: None,
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
+        }
+    }
     /// Creates a new tomb based on a key
     pub fn new(path: String, value: Vec<u8>, key: Key) -> AES256Secret {
         AES256Secret {
