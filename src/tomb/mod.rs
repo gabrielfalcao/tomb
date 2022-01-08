@@ -318,6 +318,11 @@ impl AES256Tomb {
         self.add_secret_from_bytes(path, Vec::from(plaintext), key)
     }
 
+    pub fn upsert_secret(&mut self, secret: AES256Secret) -> AES256Secret {
+        self.data.insert(secret.key(), secret.clone());
+        secret
+    }
+
     pub fn add_secret_from_bytes(
         &mut self,
         path: &str,
@@ -334,9 +339,7 @@ impl AES256Tomb {
                 )));
             }
         };
-        let secret = AES256Secret::new(String::from(path), ciphertext, key);
-        self.data.insert(secret.key(), secret.clone());
-        Ok(secret.clone())
+        Ok(self.upsert_secret(AES256Secret::new(String::from(path), ciphertext, key)))
     }
 
     pub fn derive_key(&self, password: &str) -> Key {

@@ -68,10 +68,10 @@ tomb-save: build cls
 	$(TOMB_BIN) save '/work/vpn' 'Sup@1wadsaa'
 	$(TOMB_BIN) save '/work/employee_id' '42069'
 	$(TOMB_BIN) save '/gmail/my@gmail.com' 's(22;@dup3cr3t'
-	$(TOMB_BIN) save '/spotify' 'COCCOp@d99'
-	$(TOMB_BIN) save '/netflix' '42069'
-	$(TOMB_BIN) save '/github' 'f$$bd^*G0912'
-	$(TOMB_BIN) save '/twitter' '**7w337%@$$'
+	$(TOMB_BIN) save '/spotify' 'COCCOp@d99' --url "https://spotify.com" --notes "shared account"
+	$(TOMB_BIN) save '/netflix' --url "https://netflix.com" '42069'
+	$(TOMB_BIN) save '/github'  --url "https://github.com" 'f$$bd^*G0912'
+	$(TOMB_BIN) save '/twitter' --url "https://twitter.com" '**7w337%@$$' --username "someuser"
 
 tomb-list: build cls
 	$(TOMB_BIN) list

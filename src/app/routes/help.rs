@@ -82,6 +82,7 @@ Keyboard Shortcuts:
 
   Secrets
   ~~~~~~~
+    '/' or 'f' show search box
     't' toggle visibility
     'r' reveal
     'c' copy to clipboard
