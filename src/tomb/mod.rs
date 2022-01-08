@@ -157,8 +157,8 @@ impl AES256Secret {
     pub fn update(&mut self, path: String, plaintext: Vec<u8>, key: Key) -> Result<(), Error> {
         self.digest = key.digest();
         self.path = path.clone();
-        let cyphertext = match key.encrypt(&plaintext) {
-            Ok(cypher) => cypher,
+        let ciphertext = match key.encrypt(&plaintext) {
+            Ok(cipher) => cipher,
             Err(error) => {
                 return Err(Error::with_message(format!(
                     "{}{}{}{}",
@@ -169,7 +169,7 @@ impl AES256Secret {
                 )));
             }
         };
-        self.value = b64encode(&cyphertext);
+        self.value = b64encode(&ciphertext);
         self.updated_at = Utc::now();
         Ok(())
     }
@@ -343,7 +343,7 @@ impl AES256Tomb {
         key: Key,
     ) -> Result<AES256Secret, Error> {
         let ciphertext = match key.encrypt(&plaintext) {
-            Ok(cypher) => cypher,
+            Ok(cipher) => cipher,
             Err(error) => {
                 return Err(Error::with_message(format!(
                     "cannot encrypt data for path '{}' with the provided key: {}",
