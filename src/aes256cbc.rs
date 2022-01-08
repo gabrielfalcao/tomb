@@ -3,7 +3,7 @@ aes-256-cbc module
 
 This library provides user-friendly utilities for performing AES-256-CBC operations.
 
-Currenly supports:
+Currently, supports:
 
 - key derivation with password
 - encryption
@@ -19,7 +19,7 @@ use tomb::aes256cbc::{Key, Config};
 let config = Config::from_vec(&[100, 200, 300]);
 
 let password = String::from("I <3 Nickelback");
-let key = Key::from_password(&password.as_bytes(), &config);
+let key = Key::from_password(&password, &config);
 
 let plaintext = b"Some secret information";
 let cyphertext = key.encrypt(plaintext).ok().expect("encryption failed");
@@ -30,7 +30,6 @@ assert_eq!((*plaintext).to_vec(), decrypted);
 ```
 */
 
-extern crate crypto;
 extern crate rand;
 
 use crate::{
@@ -71,7 +70,7 @@ pub fn default_key_filename() -> String {
 pub const KEY_CYCLES: u32 = 16000;
 ///The builtin number of cycles for a salt derivation
 pub const SALT_CYCLES: u32 = 16000;
-///The builtin number of cycles for a iv derivation
+///The builtin number of cycles for an iv derivation
 pub const IV_CYCLES: u32 = 16000;
 
 const KEY_SIZE: usize = 256;
@@ -197,31 +196,37 @@ impl Config {
     pub fn iv_cycles(&self) -> u32 {
         self.cycles.iv
     }
+
     pub fn key_cycles(&self) -> u32 {
         self.cycles.key
     }
+
     pub fn salt_cycles(&self) -> u32 {
         self.cycles.salt
     }
-    pub fn derive_key<'a>(&self, password: &[u8], salt: &[u8]) -> [u8; KEY_SIZE] {
+
+    pub fn derive_key(&self, password: &str, salt: &[u8]) -> [u8; KEY_SIZE] {
         let mut dk = [0u8; KEY_SIZE]; // derived key
-        let mut mac = Hmac::new(Sha256::new(), password);
-        pbkdf2::pbkdf2(&mut mac, &salt, self.key_cycles(), &mut dk);
+        let mut mac = Hmac::new(Sha256::new(), password.as_bytes());
+        pbkdf2::pbkdf2(&mut mac, salt, self.key_cycles(), &mut dk);
         dk
     }
-    pub fn derive_salt<'a>(&self, password: &[u8]) -> [u8; KEY_SIZE] {
+
+    pub fn derive_salt(&self, password: &str) -> [u8; KEY_SIZE] {
         let mut dk = [0u8; KEY_SIZE]; // derived key
-        let mut mac = Hmac::new(Sha256::new(), password);
-        pbkdf2::pbkdf2(&mut mac, &password, self.salt_cycles(), &mut dk);
+        let mut mac = Hmac::new(Sha256::new(), password.as_bytes());
+        pbkdf2::pbkdf2(&mut mac, password.as_bytes(), self.salt_cycles(), &mut dk);
         dk
     }
-    pub fn derive_iv<'a>(&self, password: &[u8]) -> [u8; IV_SIZE] {
+
+    pub fn derive_iv(&self, password: &str) -> [u8; IV_SIZE] {
         let mut dk = [0u8; IV_SIZE]; // derived iv
-        let mut mac = Hmac::new(Sha256::new(), password);
-        pbkdf2::pbkdf2(&mut mac, &password, self.iv_cycles(), &mut dk);
+        let mut mac = Hmac::new(Sha256::new(), password.as_bytes());
+        pbkdf2::pbkdf2(&mut mac, password.as_bytes(), self.iv_cycles(), &mut dk);
         dk
     }
 }
+
 /// AES-256 Key data
 #[derive(PartialEq, Serialize, Deserialize, Clone)]
 pub struct Key {
@@ -231,15 +236,17 @@ pub struct Key {
     pub iv: String,
     pub magic: Option<Vec<u32>>,
 }
+
 impl YamlFile<Error> for Key {
     fn default() -> Result<Key, Error> {
         let filename = default_key_filename();
         Key::import(filename.borrow())
     }
 }
+
 impl Key {
     /// Derive a key from a password using the cycles from the given config
-    pub fn from_password(password: &[u8], config: &Config) -> Key {
+    pub fn from_password(password: &str, config: &Config) -> Key {
         let iv = config.derive_iv(password);
         let salt = config.derive_salt(password);
         //let salt = generate_iv();
@@ -400,8 +407,8 @@ impl Key {
             )));
         }
 
-        let cyphertext = &cyphertext[DIGEST_SIZE..];
-        let mut read_buffer = buffer::RefReadBuffer::new(&cyphertext);
+        let ciphertext = &cyphertext[DIGEST_SIZE..];
+        let mut read_buffer = buffer::RefReadBuffer::new(&ciphertext);
         let mut buffer = [0; BLOCK_SIZE];
         let mut write_buffer = buffer::RefWriteBuffer::new(&mut buffer);
 
@@ -441,13 +448,13 @@ mod tests {
     #[test]
     fn test_encrypt_and_decrypt() {
         let config = Config::builtin(None);
-        let password = String::from("123456");
-        let key = Key::from_password(&password.as_bytes(), &config);
+        let password = "123456";
+        let key = Key::from_password(password, &config);
 
         let plaintext = b"This is a secret";
-        let cyphertext = key.encrypt(plaintext).unwrap();
+        let ciphertext = key.encrypt(plaintext).unwrap();
 
-        let decrypted = key.decrypt(&cyphertext).unwrap();
+        let decrypted = key.decrypt(&ciphertext).unwrap();
         assert_equal!(decrypted, b"This is a secret");
     }
 }
