@@ -1,6 +1,6 @@
 pub use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
-pub use std::{cell::RefCell, rc::Rc};
+pub use std::{cell::RefCell, sync::Arc};
 
 pub use tui::{
     backend::CrosstermBackend,

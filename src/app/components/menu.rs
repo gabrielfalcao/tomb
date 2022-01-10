@@ -21,7 +21,7 @@ pub struct MenuItem {
     pub route_path: String,
     pub code: KeyCode,
 }
-pub type SharedMenu = Rc<RefCell<Menu>>;
+pub type SharedMenu = Arc<RefCell<Menu>>;
 impl MenuItem {
     pub fn new(label: String, code: KeyCode, route_path: String) -> MenuItem {
         MenuItem {

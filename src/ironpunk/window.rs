@@ -3,7 +3,7 @@ use super::base::*;
 use crossterm::event::KeyEvent;
 
 use std::marker::PhantomData;
-pub use std::{cell::RefCell, rc::Rc};
+pub use std::{cell::RefCell, sync::Arc};
 
 use tui::Terminal;
 #[allow(dead_code)]

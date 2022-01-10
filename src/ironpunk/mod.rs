@@ -13,7 +13,7 @@ use crossterm::{
 
 use crate::logger;
 
-pub use std::{cell::RefCell, rc::Rc};
+pub use std::{cell::RefCell, sync::Arc};
 use std::{
     io::{self},
     panic,
@@ -74,7 +74,7 @@ pub fn start(router: SharedRouter, tick_interval: u64) -> Result<(), SharedError
     let mut terminal = Terminal::new(backend)?;
     terminal.clear()?;
     let mut window = Window::from_routes(router.clone());
-    let context = Rc::new(RefCell::new(window.context.clone()));
+    let context = Arc::new(RefCell::new(window.context.clone()));
 
     loop {
         window.render(&mut terminal, context.clone(), router.clone())?;

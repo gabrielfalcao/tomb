@@ -8,7 +8,7 @@ use crossterm::terminal::disable_raw_mode;
 
 use super::geometry::get_modal_rect;
 use route_recognizer::Router;
-pub use std::{cell::RefCell, rc::Rc};
+pub use std::{sync::Arc, cell::RefCell};
 use std::{
     fmt,
     io::{self},
@@ -25,10 +25,10 @@ pub use tui::{
 
 pub type Backend = CrosstermBackend<io::Stdout>;
 pub type SharedError = Box<dyn std::error::Error>;
-pub type SharedComponent = Rc<RefCell<dyn Component>>;
-pub type SharedFocusable = Rc<RefCell<dyn Focusable>>;
-pub type SharedField = Rc<RefCell<dyn Field>>;
-pub type SharedRoute = Rc<RefCell<dyn Route>>;
+pub type SharedComponent = Arc<RefCell<dyn Component>>;
+pub type SharedFocusable = Arc<RefCell<dyn Focusable>>;
+pub type SharedField = Arc<RefCell<dyn Field>>;
+pub type SharedRoute = Arc<RefCell<dyn Route>>;
 pub type SharedRouter = Router<SharedRoute>;
 
 #[derive(Debug, Error, Clone)]
@@ -82,7 +82,7 @@ pub enum LoopEvent {
 pub fn log(message: String) {
     log_to_file("ironpunk.log", message).unwrap()
 }
-pub type SharedContext<'a> = Rc<RefCell<Context<'a>>>;
+pub type SharedContext<'a> = Arc<RefCell<Context<'a>>>;
 
 #[derive(Clone)]
 pub struct Context<'a> {

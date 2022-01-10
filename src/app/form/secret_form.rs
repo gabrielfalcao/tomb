@@ -83,14 +83,14 @@ pub fn create_fields(
         visible,
     );
 
-    fields.push(Rc::new(RefCell::new(field_name)));
-    fields.push(Rc::new(RefCell::new(field_group)));
-    fields.push(Rc::new(RefCell::new(field_secret)));
-    fields.push(Rc::new(RefCell::new(field_username)));
-    fields.push(Rc::new(RefCell::new(field_url)));
-    fields.push(Rc::new(RefCell::new(field_updated_at)));
-    fields.push(Rc::new(RefCell::new(field_digest)));
-    fields.push(Rc::new(RefCell::new(field_notes)));
+    fields.push(Arc::new(RefCell::new(field_name)));
+    fields.push(Arc::new(RefCell::new(field_group)));
+    fields.push(Arc::new(RefCell::new(field_secret)));
+    fields.push(Arc::new(RefCell::new(field_username)));
+    fields.push(Arc::new(RefCell::new(field_url)));
+    fields.push(Arc::new(RefCell::new(field_updated_at)));
+    fields.push(Arc::new(RefCell::new(field_digest)));
+    fields.push(Arc::new(RefCell::new(field_notes)));
 
     fields
 }
