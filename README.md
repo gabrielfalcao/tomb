@@ -99,4 +99,10 @@ tomb delete personal/spotify/myuser@protonmail.com
 tomb ui
 ```
 
+### Demo video
+
+https://user-images.githubusercontent.com/54914/148100296-c4a910bc-c56d-4bb2-b820-b88fca9a9d67.mp4
+
+
+
 [![asciicast](https://asciinema.org/a/IhuSX6v9YjszzvkpBLHJfZvBt.svg)](https://asciinema.org/a/IhuSX6v9YjszzvkpBLHJfZvBt)
