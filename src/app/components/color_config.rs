@@ -76,13 +76,13 @@ pub fn create_fields(colors: ColorTheme) -> Vec<SharedField> {
         true,
     );
 
-    fields.push(Rc::new(RefCell::new(field_color_default)));
-    fields.push(Rc::new(RefCell::new(field_color_light)));
-    fields.push(Rc::new(RefCell::new(field_color_blurred)));
-    fields.push(Rc::new(RefCell::new(field_color_default_fg)));
-    fields.push(Rc::new(RefCell::new(field_color_default_bg)));
-    fields.push(Rc::new(RefCell::new(field_color_error_fg)));
-    fields.push(Rc::new(RefCell::new(field_color_error_bg)));
+    fields.push(Arc::new(RefCell::new(field_color_default)));
+    fields.push(Arc::new(RefCell::new(field_color_light)));
+    fields.push(Arc::new(RefCell::new(field_color_blurred)));
+    fields.push(Arc::new(RefCell::new(field_color_default_fg)));
+    fields.push(Arc::new(RefCell::new(field_color_default_bg)));
+    fields.push(Arc::new(RefCell::new(field_color_error_fg)));
+    fields.push(Arc::new(RefCell::new(field_color_error_bg)));
     fields
 }
 impl<'a> ColorThemeConfiguration<'a> {

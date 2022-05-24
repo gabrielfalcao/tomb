@@ -13,7 +13,7 @@ use crossterm::{
 
 use crate::logger;
 
-pub use std::{cell::RefCell, rc::Rc};
+pub use std::{cell::RefCell, sync::Arc};
 use std::{
     io::{self},
     panic,
@@ -61,7 +61,6 @@ pub fn start(router: SharedRouter, tick_interval: u64) -> Result<(), SharedError
                     CEvent::Resize(_width, _height) => {}
                 }
             }
-
             if last_tick.elapsed() >= tick_rate {
                 if let Ok(_) = tx.send(Event::Tick) {
                     last_tick = Instant::now();
@@ -75,7 +74,7 @@ pub fn start(router: SharedRouter, tick_interval: u64) -> Result<(), SharedError
     let mut terminal = Terminal::new(backend)?;
     terminal.clear()?;
     let mut window = Window::from_routes(router.clone());
-    let context = Rc::new(RefCell::new(window.context.clone()));
+    let context = Arc::new(RefCell::new(window.context.clone()));
 
     loop {
         window.render(&mut terminal, context.clone(), router.clone())?;
@@ -94,7 +93,7 @@ pub fn start(router: SharedRouter, tick_interval: u64) -> Result<(), SharedError
                     Ok(Propagate) => continue,
                     Ok(Prevent) => break Ok(()),
                     Ok(Refresh) => {
-                        // window.render(&mut terminal, context.clone(), router.clone())?;
+                        //window.render(&mut terminal, context.clone(), router.clone())?;
                     }
                     Err(err) => {
                         log(format!("{}", err));
@@ -107,7 +106,7 @@ pub fn start(router: SharedRouter, tick_interval: u64) -> Result<(), SharedError
             Event::Tick => {
                 match window.tick(&mut terminal, context.clone(), router.clone()) {
                     Ok(Refresh) => {
-                        window.render(&mut terminal, context.clone(), router.clone())?;
+                        //window.render(&mut terminal, context.clone(), router.clone())?;
                         continue;
                     }
                     Ok(Prevent | Propagate) => continue,
