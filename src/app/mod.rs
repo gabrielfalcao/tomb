@@ -16,7 +16,7 @@ use crate::aes256cbc::{Config as AesConfig, Key};
 
 use crate::tomb::{AES256Secret, AES256Tomb};
 pub use config::TombConfig;
-use std::{cell::RefCell, sync::Arc};
+use std::{cell::RefCell, rc::Rc};
 
 pub fn start(
     tomb: AES256Tomb,
@@ -26,26 +26,26 @@ pub fn start(
     tick_interval: u64,
 ) -> Result<(), ironpunk::SharedError> {
     let mut router = ironpunk::SharedRouter::new();
-    let menu = Arc::new(RefCell::new(Menu::default()));
+    let menu = Rc::new(RefCell::new(Menu::default()));
 
     router.add(
         "/help",
-        Arc::new(RefCell::new(Help::new(menu.clone(), tomb_config.clone()))),
+        Rc::new(RefCell::new(Help::new(menu.clone(), tomb_config.clone()))),
     );
     router.add(
         "/config",
-        Arc::new(RefCell::new(Configuration::new(
+        Rc::new(RefCell::new(Configuration::new(
             menu.clone(),
             tomb_config.clone(),
         ))),
     );
     router.add(
         "/about",
-        Arc::new(RefCell::new(About::new(menu.clone(), tomb_config.clone()))),
+        Rc::new(RefCell::new(About::new(menu.clone(), tomb_config.clone()))),
     );
     router.add(
         "/delete/:key",
-        Arc::new(RefCell::new(DeleteSecret::new(
+        Rc::new(RefCell::new(DeleteSecret::new(
             key.clone(),
             tomb.clone(),
             tomb_config.clone(),
@@ -54,7 +54,7 @@ pub fn start(
     );
     router.add(
         "/edit/:key",
-        Arc::new(RefCell::new(EditSecret::new(
+        Rc::new(RefCell::new(EditSecret::new(
             key.clone(),
             tomb.clone(),
             tomb_config.clone(),
@@ -62,7 +62,7 @@ pub fn start(
     );
     router.add(
         "/",
-        Arc::new(RefCell::new(Application::new(
+        Rc::new(RefCell::new(Application::new(
             menu,
             key.clone(),
             tomb.clone(),

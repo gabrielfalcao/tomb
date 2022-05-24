@@ -1,5 +1,5 @@
 pub mod logging;
-use crate::aes256cbc::{Config as AesConfig, Digest, Key, DIGEST_SIZE};
+use crate::aes256cbc::{Config as AesConfig, Digest, Key};
 
 use crate::core::version;
 use crate::{
@@ -70,19 +70,6 @@ pub struct AES256Secret {
     pub updated_at: DateTime<Utc>,
 }
 impl AES256Secret {
-    pub fn empty() -> AES256Secret {
-        AES256Secret {
-            digest: [0; DIGEST_SIZE],
-            path: String::new(),
-            value: String::new(),
-            notes: None,
-            url: None,
-            username: None,
-            attributes: None,
-            created_at: Utc::now(),
-            updated_at: Utc::now(),
-        }
-    }
     /// Creates a new tomb based on a key
     pub fn new(path: String, value: Vec<u8>, key: Key) -> AES256Secret {
         AES256Secret {
@@ -157,8 +144,8 @@ impl AES256Secret {
     pub fn update(&mut self, path: String, plaintext: Vec<u8>, key: Key) -> Result<(), Error> {
         self.digest = key.digest();
         self.path = path.clone();
-        let ciphertext = match key.encrypt(&plaintext) {
-            Ok(cipher) => cipher,
+        let cyphertext = match key.encrypt(&plaintext) {
+            Ok(cypher) => cypher,
             Err(error) => {
                 return Err(Error::with_message(format!(
                     "{}{}{}{}",
@@ -169,7 +156,7 @@ impl AES256Secret {
                 )));
             }
         };
-        self.value = b64encode(&ciphertext);
+        self.value = b64encode(&cyphertext);
         self.updated_at = Utc::now();
         Ok(())
     }
@@ -343,7 +330,7 @@ impl AES256Tomb {
         key: Key,
     ) -> Result<AES256Secret, Error> {
         let ciphertext = match key.encrypt(&plaintext) {
-            Ok(cipher) => cipher,
+            Ok(cypher) => cypher,
             Err(error) => {
                 return Err(Error::with_message(format!(
                     "cannot encrypt data for path '{}' with the provided key: {}",

@@ -54,9 +54,9 @@ pub fn create_fields(config: TombConfig) -> Vec<SharedField> {
         true,
         true,
     );
-    fields.push(Arc::new(RefCell::new(field_key_filename)));
-    fields.push(Arc::new(RefCell::new(field_tomb_filename)));
-    fields.push(Arc::new(RefCell::new(field_log_filename)));
+    fields.push(Rc::new(RefCell::new(field_key_filename)));
+    fields.push(Rc::new(RefCell::new(field_tomb_filename)));
+    fields.push(Rc::new(RefCell::new(field_log_filename)));
     fields
 }
 impl<'a> TombConfiguration<'a> {

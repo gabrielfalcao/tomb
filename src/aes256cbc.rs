@@ -22,9 +22,9 @@ let password = String::from("I <3 Nickelback");
 let key = Key::from_password(&password, &config);
 
 let plaintext = b"Some secret information";
-let ciphertext = key.encrypt(plaintext).ok().expect("encryption failed");
+let cyphertext = key.encrypt(plaintext).ok().expect("encryption failed");
 
-let decrypted = key.decrypt(&ciphertext).ok().expect("decryption failed");
+let decrypted = key.decrypt(&cyphertext).ok().expect("decryption failed");
 
 assert_eq!((*plaintext).to_vec(), decrypted);
 ```
@@ -53,8 +53,8 @@ use std::borrow::Borrow;
 use std::io::Read;
 use std::{fmt, fs::File};
 
-pub const ALGO: &'static str = "aes-256-cbc";
-pub const DIGEST_SIZE: usize = 32;
+const ALGO: &'static str = "aes-256-cbc";
+const DIGEST_SIZE: usize = 32;
 
 ///The path used by `Key::default()` and `Config::default()`
 pub const TOMB_KEY: &'static str = "~/.tomb.key";
@@ -73,9 +73,9 @@ pub const SALT_CYCLES: u32 = 16000;
 ///The builtin number of cycles for an iv derivation
 pub const IV_CYCLES: u32 = 16000;
 
-pub const KEY_SIZE: usize = 256;
-pub const IV_SIZE: usize = 16;
-pub const BLOCK_SIZE: usize = 4096;
+const KEY_SIZE: usize = 256;
+const IV_SIZE: usize = 16;
+const BLOCK_SIZE: usize = 4096;
 
 pub type Digest = [u8; DIGEST_SIZE];
 
@@ -338,16 +338,16 @@ impl Key {
             blockmodes::PkcsPadding,
         );
 
-        let mut ciphertext = Vec::<u8>::new();
+        let mut cyphertext = Vec::<u8>::new();
         let mut read_buffer = buffer::RefReadBuffer::new(data);
         let mut buffer = [0; BLOCK_SIZE];
         let mut write_buffer = buffer::RefWriteBuffer::new(&mut buffer);
 
-        // The first 32 bytes of the ciphertext are always the digest,
+        // The first 32 bytes of the cyphertext are always the digest,
         // this allows for checking if a file was encrypted with the
         // correct key and take the appropriate action.
         let digest = self.digest();
-        ciphertext.extend_from_slice(&digest);
+        cyphertext.extend_from_slice(&digest);
 
         loop {
             let result = match encryptor.encrypt(&mut read_buffer, &mut write_buffer, true) {
@@ -359,7 +359,7 @@ impl Key {
                     )))
                 }
             };
-            ciphertext.extend(
+            cyphertext.extend(
                 write_buffer
                     .take_read_buffer()
                     .take_remaining()
@@ -372,12 +372,12 @@ impl Key {
                 BufferResult::BufferOverflow => {}
             }
         }
-        Ok(ciphertext)
+        Ok(cyphertext)
     }
 
     /// Decrypts a buffer with the key
     /// AES-256/CBC/Pkcs decryption.
-    pub fn decrypt(&self, ciphertext: &[u8]) -> Result<Vec<u8>, Error> {
+    pub fn decrypt(&self, cyphertext: &[u8]) -> Result<Vec<u8>, Error> {
         let mut decryptor = aes::cbc_decryptor(
             aes::KeySize::KeySize256,
             &match self.key_bytes() {
@@ -392,7 +392,7 @@ impl Key {
         );
 
         let mut plaintext = Vec::<u8>::new();
-        let hmac_bytes: Digest = match ciphertext[..DIGEST_SIZE].try_into() {
+        let hmac_bytes: Digest = match cyphertext[..DIGEST_SIZE].try_into() {
             Ok(digest) => digest,
             Err(error) => {
                 return Err(Error::with_message(format!(
@@ -407,7 +407,7 @@ impl Key {
             )));
         }
 
-        let ciphertext = &ciphertext[DIGEST_SIZE..];
+        let ciphertext = &cyphertext[DIGEST_SIZE..];
         let mut read_buffer = buffer::RefReadBuffer::new(&ciphertext);
         let mut buffer = [0; BLOCK_SIZE];
         let mut write_buffer = buffer::RefWriteBuffer::new(&mut buffer);

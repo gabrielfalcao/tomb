@@ -37,7 +37,7 @@ impl Form {
     where
         T: Field,
     {
-        self.fields.push(Arc::new(RefCell::new(field)));
+        self.fields.push(Rc::new(RefCell::new(field)));
     }
     pub fn set_title(&mut self, title: &str) {
         self.title = Some(String::from(title));

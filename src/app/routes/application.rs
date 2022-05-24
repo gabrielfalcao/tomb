@@ -146,6 +146,13 @@ impl<'a> Application<'a> {
             .collect();
 
         let pattern = self.searchbox.pattern.clone();
+        match self.tomb.reload() {
+            // load latest version from disk
+            Ok(_) => {}
+            Err(e) => {
+                log_error(format!("failed to reload tomb from disk{}", e));
+            }
+        };
         self.filter_search(&pattern);
         let selected_secret = match self.items.current() {
             Some(secret) => secret,
@@ -236,14 +243,6 @@ impl Component for Application<'_> {
         context: SharedContext,
         router: SharedRouter,
     ) -> Result<LoopEvent, Error> {
-        match self.tomb.reload() {
-            // load latest version from disk
-            Ok(_) => {}
-            Err(e) => {
-                log_error(format!("failed to reload tomb from disk{}", e));
-            }
-        };
-
         self.menu.borrow_mut().tick(terminal, context, router)
     }
 

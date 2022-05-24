@@ -8,7 +8,7 @@ export TOMB_KEY			:= .tomb-key.yaml
 export TOMB_FILE		:= .tomb-file.yaml
 export TOMB_LOG			:= tomb.log
 
-all: tomb-ui
+all: fix release
 
 clean: cls
 	@rm -f $(TOMB_FILE) $(TOMB_KEY)
@@ -88,10 +88,10 @@ tomb-delete: build cls
 
 tomb-ui: clean tomb-init tomb-save
 	@gsed 's/cyan/yellow/g' -i $(TOMB_CONFIG)
-	$(TOMB_BIN) ui
+	$(TOMB_BIN) ui -T 1000
 
 ui:
-	cargo run --bin tomb ui
+	cargo run --bin tomb ui -T 3145
 
 obfuskat3: cls 0b4sk8d.yaml
 
