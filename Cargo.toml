@@ -38,6 +38,7 @@ default = []
 [lib]
 name = "tomb"
 path = "src/lib.rs"
+#crate-type = ["staticlib"]
 
 [[bin]]
 name = "tomb"

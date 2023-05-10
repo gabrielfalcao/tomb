@@ -1,0 +1,13 @@
+#*
+*#*
+**/*.rs.bk
+*.swp
+.#*
+.DS_Store
+.dockerignore
+.git
+.gitignore
+Cargo.lock
+Dockerfile
+data
+target

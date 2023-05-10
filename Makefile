@@ -46,6 +46,7 @@ dry-run:tmp
 build: check
 	cargo build
 
+
 check:
 	cargo check --all-targets
 
@@ -109,5 +110,13 @@ load: clean build
 
 app: clean tomb-ui
 
+docker-image:
+	docker build -t gabrielfalcao/tomb .
+
+docker-run:
+	docker run --rm -ti gabrielfalcao/tomb
+
+# build-in-docker:
+# 	docker run --rm --user "$$(id -u)":"$$(id -g)" -v "$(shell pwd)":/usr/src/tomb -w /usr/src/tomb gabrielfalcao/tomb cargo build --release
 
 .PHONY: all release tmp test dry-run coverage aes256 build check clean test-e2e test-aes-256 test-slugify-filenames bip39 ipleak obfuskat3 app pets fix
