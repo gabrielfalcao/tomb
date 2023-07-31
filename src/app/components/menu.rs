@@ -1,7 +1,7 @@
 #![allow(unused_variables)]
 
-use crate::app::ui;
 use crate::app::log_error;
+use crate::app::ui;
 use crate::ironpunk::*;
 use crossterm::event::{KeyCode, KeyEvent};
 use route_recognizer::Router;

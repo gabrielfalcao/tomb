@@ -309,19 +309,19 @@ impl Key {
     }
     pub fn iv_bytes(&self) -> Result<Vec<u8>, Error> {
         match b64decode(self.iv.as_bytes()) {
-            Ok(v) => Ok(v),
+            Ok(v) => Ok(v[..16].to_vec()),
             Err(e) => Err(Error::with_message(format!("parse base64 iv: {}", e))),
         }
     }
     pub fn key_bytes(&self) -> Result<Vec<u8>, Error> {
         match b64decode(self.key.as_bytes()) {
-            Ok(v) => Ok(v[v.len()-32..].to_vec()),
+            Ok(v) => Ok(v[..32].to_vec()),
             Err(e) => Err(Error::with_message(format!("parse base64 key: {}", e))),
         }
     }
     pub fn mac_bytes(&self) -> Result<Vec<u8>, Error> {
         match b64decode(self.mac.as_bytes()) {
-            Ok(v) => Ok(v[v.len()-16..].to_vec()),
+            Ok(v) => Ok(v[..16].to_vec()),
             Err(e) => Err(Error::with_message(format!("parse base64 mac: {}", e))),
         }
     }
