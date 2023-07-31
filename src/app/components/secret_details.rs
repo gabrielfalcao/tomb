@@ -2,17 +2,17 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
-pub use super::super::components::{menu::Menu, modal::Modal, searchbox::SearchBox};
-pub use super::super::form::{Form, SecretField, TextField};
+pub use crate::app::components::{menu::Menu, modal::Modal, searchbox::SearchBox};
+pub use crate::app::form::{Form, SecretField, TextField};
 
-pub use super::super::state::*;
-use super::super::ui;
+pub use crate::app::state::*;
+use crate::app::ui;
 use crate::app::log_error;
 
 use crate::ironpunk::*;
 
 extern crate clipboard;
-use super::super::{AES256Secret, AES256Tomb, TombConfig};
+use crate::app::{AES256Secret, AES256Tomb, TombConfig};
 use crate::aes256cbc::Key;
 
 use crossterm::event::{KeyCode, KeyEvent};

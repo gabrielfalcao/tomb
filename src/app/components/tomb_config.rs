@@ -1,8 +1,8 @@
 #![allow(unused_imports)]
 #![allow(unused_variables)]
 
-use super::super::geometry::*;
-use super::super::ui;
+use crate::app::geometry::*;
+use crate::app::ui;
 
 use crate::app::form::{Form, TextField};
 use crate::app::TombConfig;

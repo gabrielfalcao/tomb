@@ -1,6 +1,6 @@
 #![allow(unused_variables)]
 
-use super::super::ui;
+use crate::app::ui;
 use crate::app::log_error;
 use crate::ironpunk::*;
 use crossterm::event::{KeyCode, KeyEvent};

@@ -1,8 +1,8 @@
 #![allow(unused_imports)]
 #![allow(unused_variables)]
 
-use super::super::geometry::*;
-use super::super::ui;
+use crate::app::geometry::*;
+use crate::app::ui;
 
 use crate::app::config::ColorTheme;
 use crate::app::form::{Form, RGBColorField};

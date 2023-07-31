@@ -1,3 +1,4 @@
+#![allow(ambiguous_glob_reexports)]
 pub mod color_config;
 pub mod confirmation;
 pub mod menu;

@@ -73,7 +73,7 @@ pub const SALT_CYCLES: u32 = 16000;
 ///The builtin number of cycles for an iv derivation
 pub const IV_CYCLES: u32 = 16000;
 
-const KEY_SIZE: usize = 256;
+const KEY_SIZE: usize = 0xff;
 const IV_SIZE: usize = 16;
 const BLOCK_SIZE: usize = 4096;
 
@@ -315,13 +315,13 @@ impl Key {
     }
     pub fn key_bytes(&self) -> Result<Vec<u8>, Error> {
         match b64decode(self.key.as_bytes()) {
-            Ok(v) => Ok(v),
+            Ok(v) => Ok(v[v.len()-32..].to_vec()),
             Err(e) => Err(Error::with_message(format!("parse base64 key: {}", e))),
         }
     }
     pub fn mac_bytes(&self) -> Result<Vec<u8>, Error> {
         match b64decode(self.mac.as_bytes()) {
-            Ok(v) => Ok(v),
+            Ok(v) => Ok(v[v.len()-16..].to_vec()),
             Err(e) => Err(Error::with_message(format!("parse base64 mac: {}", e))),
         }
     }
